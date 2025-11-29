@@ -8,7 +8,7 @@ namespace Overview
 
     bool firstLoad = true;
 
-    float widthName, widthTime, widthMedal, widthGrade;
+    float widthName, widthTime, widthMedal, widthGrade, widthTmxId;
     
     void Init()
     {
@@ -16,6 +16,7 @@ namespace Overview
         widthTime = Draw::MeasureString("10:59:59.999").x;
         widthMedal = Draw::MeasureString(Icons::Circle).x;
         widthGrade = Draw::MeasureString("AAAAAAAAAAAAAAAA").x;
+        widthTmxId = Draw::MeasureString("399999").x;
         
         initialized = true;
     }

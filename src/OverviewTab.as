@@ -118,13 +118,20 @@ namespace Overview
 
             RenderSearch();
 
-            if (UI::BeginTable("pvm_overview_table_" + GetName(), 6, UI::TableFlags::SizingFixedFit | UI::TableFlags::RowBg))
+            int tableCount = 6;
+            
+            if (Setting::overview_table_show_tmx_id) tableCount++;
+
+            if (UI::BeginTable("pvm_overview_table_" + GetName(), tableCount, UI::TableFlags::SizingFixedFit | UI::TableFlags::RowBg))
             {
                 UI::TableSetupColumn("name", UI::TableColumnFlags::WidthFixed, widthName);
                 UI::TableSetupColumn("author", UI::TableColumnFlags::WidthStretch);
                 UI::TableSetupColumn("grade", UI::TableColumnFlags::WidthFixed, widthGrade);
                 UI::TableSetupColumn("medal", UI::TableColumnFlags::WidthFixed, widthMedal + widthTime + 1);
-                //UI::TableSetupColumn("time", UI::TableColumnFlags::WidthFixed, timeWidth);
+                if (Setting::overview_table_show_tmx_id)
+                {
+                    UI::TableSetupColumn("tmx id", UI::TableColumnFlags::WidthFixed, widthTmxId);
+                }
                 UI::TableSetupColumn("playBtn");
                 UI::TableSetupColumn("tmxBtn");
                 bool shownTooltip = false;
@@ -142,6 +149,13 @@ namespace Overview
                 }
                 UI::TableNextColumn();
                 SortLabel("Time", SortMode::TIME, SortMode::TIME_INVERTED);
+
+                if (Setting::overview_table_show_tmx_id)
+                {
+                    UI::TableNextColumn();
+                    UI::Text("Tmx Id");
+                }
+
                 UI::TableNextColumn();
                 UI::Text("");
                 UI::TableNextColumn();
@@ -234,7 +248,6 @@ namespace Overview
             UI::PushID(map.Uid);
             UI::TableNextRow();
 
-
             UI::TableNextColumn();
             vec2 startPos = UI::GetCursorScreenPos();
             UI::Text(map.Name);
@@ -248,6 +261,18 @@ namespace Overview
             UI::TableNextColumn();
             string timeText = map.pb <= 0 ? "\\$666 no pb\\$z" : Utils::ReadableTime(map.pb);
             UI::Text(GetMedalToShow(map) + "\\$z " + timeText);
+
+            if (Setting::overview_table_show_tmx_id)
+            {
+                UI::TableNextColumn();
+                UI::Text(map.TmxId + "");
+
+                if (UI::IsItemClicked())
+                {
+                    IO::SetClipboard(map.TmxId + "");
+                    UI::ShowNotification("Tmx Id for " + map.Name + " [" + map.TmxId + "] copied to clipboard");
+                }
+            }
 
             UI::TableNextColumn();
             if (UI::Button("Play"))

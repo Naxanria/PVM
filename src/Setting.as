@@ -43,6 +43,8 @@ namespace Setting
     int overview_tooltip_thumbnail_size = 278;
     [Setting name="Show medal labels in thumbnail" category="Overview"]
     bool overview_tooltip_medals_show_label = true;
+    [Setting name="Show map tmx id in overview" category="Overview"]
+    bool overview_table_show_tmx_id = true;
 
     [Setting name="Logging Level" category="Debug"]
     Logging::LogLevel logging_level = Logging::LogLevel::Info;
