@@ -1,4 +1,0 @@
-make reloading work properly
-have links to sheet/discord on the overview tab
-have reload for specific pvm on the overview tab or settings
-have full reload as only thing in menu besides overview?
