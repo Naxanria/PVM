@@ -236,3 +236,18 @@ void OnSettingsSave(Settings::Section& section)
 {
     Setting::OnSettingsSave(section);
 }
+
+bool keyHeld = false;
+void OnKeyPress(bool down, VirtualKey key)
+{
+    if (!keyHeld)
+    {
+        if (key == Setting::overview_hotkey_show)
+        {
+            Setting::overview_show = !Setting::overview_show;
+        }
+    }
+
+    keyHeld = down;
+}
+
