@@ -214,9 +214,7 @@ void Render()
 {
     if (fullReload) return;
 
-// #if SIG_DEVELOPER
-//     Debug::DisplayWindow();
-// #endif
+
 
     if (Setting::pvm_show && !currentPvm.IsEmpty() && currentPvm.enabled)
     {

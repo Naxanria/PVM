@@ -213,6 +213,13 @@ namespace Overview
                     UpdateSortMode(mode);
                 }
             }
+
+            if (UI::IsItemHovered())
+            {
+                UI::BeginTooltip();
+                UI::Text("Sort by " + name);
+                UI::EndTooltip();
+            }            
         }
 
         void UpdateSortMode(SortMode newMode)
