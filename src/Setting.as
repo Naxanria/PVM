@@ -23,6 +23,8 @@ namespace Setting
     bool pvm_show_personal_best = true;
     [Setting name="Show delta" category="PVM"]
     bool pvm_show_delta = true;
+    [Setting name="Show delta sign" category="PVM"]
+    bool pvm_show_delta_sign = true;
 
     // [Setting name="pvm_extra_settings" category="PVM" hidden]
     // string pvm_extra_settings = "{}";

@@ -277,13 +277,14 @@ class PVM
                 else
                 {
                     int delta = personalBest - medalTime;
+                    string sign = Setting::pvm_show_delta_sign ? (delta < 0 ? "-" : "+") : "";
                     if (delta < 0)
                     {
-                        UI::Text(Colour::TIME_DELTA_AHEAD + Utils::ReadableTime(delta * -1));
+                        UI::Text(Colour::TIME_DELTA_AHEAD + sign + Utils::ReadableTime(delta * -1));
                     }
                     else
                     {
-                        UI::Text(Colour::TIME_DELTA_BEHIND + Utils::ReadableTime(delta));
+                        UI::Text(Colour::TIME_DELTA_BEHIND + sign + Utils::ReadableTime(delta));
                     }
                 }
             }
