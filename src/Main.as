@@ -93,7 +93,8 @@ void Main()
                     auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
                     int pb = scoreMgr.Map_GetRecord_v2(userId, currentMapUid, "PersonalBest", "", "TimeAttack", "");
 
-                    currentPvm.currentMap.SetPb(pb);
+                    currentPvm.UpdatePb(pb);
+                    //currentPvm.currentMap.SetPb(pb);
                     //Logging::Info("New pb: " + Utils::ReadableTime(pb) + " [" + pb + "]");
                 }
             }
@@ -212,6 +213,10 @@ void RenderMenu()
 void Render()
 {
     if (fullReload) return;
+
+// #if SIG_DEVELOPER
+//     Debug::DisplayWindow();
+// #endif
 
     if (Setting::pvm_show && !currentPvm.IsEmpty() && currentPvm.enabled)
     {

@@ -68,9 +68,15 @@ class MapData
         loadingPb = false;
     }
 
-    void SetPb(int time)
+    bool SetPb(int time)
     {
-        pb = time;
+        if (pb <= 0 || time < pb)
+        {
+            pb = time;
+            return true;
+        }
+        
+        return false;
     }
 
     void LoadMap()

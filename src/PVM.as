@@ -103,6 +103,23 @@ class PVM
             currentMap = cast<MapData@>(uidToMap[uid]);
     }
 
+    void UpdatePb(int pb)
+    {
+        // todo: check if new medal obtained
+
+        if (currentMap.SetPb(pb))
+        {
+            for (int i = 0; i < maps.Length; i++)
+            {
+                if (maps[i].Uid == currentMap.Uid)
+                {
+                    maps[i].SetPb(pb);
+                    break;
+                }
+            }
+        }
+    }
+
     void Render()
     {
         if (ReloadRequested || Fetching) return;
