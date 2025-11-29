@@ -11,6 +11,8 @@ class MapData
 
     int pb = -1;
     bool loadingPb = false;
+
+    private bool hasMedals = false;
     
     MapData()
     { }
@@ -28,6 +30,7 @@ class MapData
         for (int i = 0; i < times.Length; i++)
         {
             medalTimes.InsertLast(times[i]);
+            if (times[i] > 0) hasMedals = true;
         }
     }
 
@@ -44,6 +47,11 @@ class MapData
     bool HasMedalTime(int medal)
     {
         return GetMedalTime(medal) != 0;
+    }
+
+    bool HasMedalTimes()
+    {
+        return hasMedals;
     }
 
     void LoadPb()
@@ -75,7 +83,7 @@ class MapData
             pb = time;
             return true;
         }
-        
+
         return false;
     }
 

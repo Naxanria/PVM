@@ -196,6 +196,17 @@ class PVM
 
         if (UI::BeginTable("pvm_medals", columns, UI::TableFlags::SizingFixedFit))
         {   
+            if (!currentMap.HasMedalTimes())
+            {
+                if (Setting::pvm_show_personal_best)
+                {
+                    InsertPb(currentMap.pb, Medals::NoMedal, true);
+                }
+
+                UI::EndTable();
+                return;
+            }
+
             bool shownPb = false;
             for (int i = labels.Length - 1; i >= 0; i--)
             {
