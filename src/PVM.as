@@ -423,15 +423,15 @@ namespace PVM
 
     int NameSort(MapData@ a, MapData@ b)
     {
-        if (a.Name < b.Name) return -1;
-        if (a.Name > b.Name) return 1;
+        if (a.Name.ToLower() < b.Name.ToLower()) return -1;
+        if (a.Name.ToLower() > b.Name.ToLower()) return 1;
         return 0;
     }
 
     int AuthorSort(MapData@ a, MapData@ b)
     {
-        if (a.Author < b.Author) return -1;
-        if (a.Author > b.Author) return 1;
+        if (a.Author.ToLower() < b.Author.ToLower()) return -1;
+        if (a.Author.ToLower() > b.Author.ToLower()) return 1;
         return 0;
     }
 
