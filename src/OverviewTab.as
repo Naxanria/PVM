@@ -189,7 +189,7 @@ namespace Overview
         }
 
         string search = "";
-
+        int foundCount = 0;
 
         private void RenderSearch()
         {
@@ -200,12 +200,35 @@ namespace Overview
             string oldsearch = search;
 
             UI::SetNextItemWidth(128);
-            search = UI::InputText("##", oldsearch);
+            search = UI::InputText("##", oldsearch, UI::InputTextFlags::EscapeClearsAll);
+
+            // if (search != "")
+            // {
+            //     UI::SameLine();
+            //     if (UI::Button("x"))
+            //     {
+            //         search = "";
+
+            //     }
+            // }
 
             if (search != oldsearch)
             {
                 pvm.UpdateSearch(search);
+                if (search != "")
+                {
+                    foundCount = pvm.GetSortedList().Length;
+                }
             }
+
+            if (search != "")
+            {
+                UI::SameLine();
+                string res = "result";
+                if (foundCount != 1) res = "results";
+                UI::Text(foundCount + " " + res);
+            }
+            
             UI::EndGroup();
         }
 
