@@ -2,6 +2,8 @@ namespace Setting
 {
     [Setting name="Show Overview Hotkey" hidden]
     VirtualKey overview_hotkey_show = VirtualKey(0);
+    [Setting name="Show PVM Window Hotkey" hidden]
+    VirtualKey pvm_window_hotkey_show = VirtualKey(0);
 
     [SettingsTab name="Hotkeys" icon="Keyboard0"]
     void RenderHotkeySettings()
@@ -12,6 +14,7 @@ namespace Setting
         }
 
         overview_hotkey_show = RenderHotKey("Show Overview", overview_hotkey_show);
+        pvm_window_hotkey_show = RenderHotKey("Show PVM Window", pvm_window_hotkey_show);
     }
 
 

@@ -246,6 +246,10 @@ void OnKeyPress(bool down, VirtualKey key)
         {
             Setting::overview_show = !Setting::overview_show;
         }
+        if (key == Setting::pvm_window_hotkey_show)
+        {
+            Setting::pvm_show = !Setting::pvm_show;
+        }
     }
 
     keyHeld = down;
