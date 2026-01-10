@@ -222,7 +222,7 @@ class PVM
 
             if (!shownPb && Setting::pvm_show_personal_best)
             {
-                InsertPb(currentMap.pb, labels[0], true);
+                InsertPb(currentMap.pb, Medals::NoMedal, true);
             }
 
             UI::EndTable();
