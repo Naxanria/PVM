@@ -12,11 +12,11 @@ namespace Overview
     
     void Init()
     {
-        widthName = Draw::MeasureString("AAAAAAAAAAAAAAAAAAAAAAAA").x;
-        widthTime = Draw::MeasureString("10:59:59.999").x;
-        widthMedal = Draw::MeasureString(Icons::Circle).x;
-        widthGrade = Draw::MeasureString("AAAAAAAAAAAAAAAA").x;
-        widthTmxId = Draw::MeasureString("399999").x;
+        widthName = UI::MeasureString("AAAAAAAAAAAAAAAAAAAAAAAA").x;
+        widthTime = UI::MeasureString("10:59:59.999").x;
+        widthMedal = UI::MeasureString(Icons::Circle).x;
+        widthGrade = UI::MeasureString("AAAAAAAAAAAAAAAA").x;
+        widthTmxId = UI::MeasureString("399999").x;
         
         initialized = true;
     }
@@ -44,7 +44,7 @@ namespace Overview
         if (tabs.Length == 0) return;
 
         vec2 size = vec2(800, 600);
-        vec2 pos = (vec2(Draw::GetWidth(), Draw::GetHeight()) - size) / 2;
+        vec2 pos = (vec2(Display::GetWidth(), Display::GetHeight()) - size) / 2;
 
         UI::SetNextWindowSize(int(size.x), int(size.y));
         UI::SetNextWindowPos(int(pos.x), int(pos.y));
