@@ -1,4 +1,4 @@
-const string PVM_JSON_URL = "https://raw.githubusercontent.com/Naxanria/tm_stuff/refs/heads/main/pvm_info.json";
+const string PVM_MAPPACK_URL = "https://pvms.club/api/mappacks";
 
 string currentMapUid;
 PVM@[] pvms;
@@ -125,7 +125,7 @@ void Main()
 
 void LoadPvms(Json::Value@ json)
 {
-    auto _ = json["PVMS"];
+    auto _ = json;
     for (int i = 0; i < _.Length; i++)
     {
         PVM@ pvm = PVM::FromJson(_[i]);
@@ -136,10 +136,10 @@ void LoadPvms(Json::Value@ json)
 
 void LoadPvmData()
 {
-    Logging::Info("Fetching pvm meta data from " + PVM_JSON_URL);
+    Logging::Info("Fetching pvm map pack data from " + PVM_MAPPACK_URL);
 
-    Json::Value@ pvmMetaJson = API::GetJson(PVM_JSON_URL);
-    LoadPvms(@pvmMetaJson);
+    Json::Value@ pvmMappackJson = API::GetJson(PVM_MAPPACK_URL);
+    LoadPvms(@pvmMappackJson);
     
     // load (enabled) pvm
     for (int i = 0; i < pvms.Length; i++)

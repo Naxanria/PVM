@@ -1,7 +1,7 @@
 class MapData
 {
     string Uid;
-    uint TmxId;
+    string TmxId;
 
     string Name;
     string Author;
@@ -19,18 +19,19 @@ class MapData
 
     MapData(Json::Value@ json)
     {
-        Uid = json["uid"];
-        TmxId = json["tmx_id"];
-        Name = json["name"];
-        Author = json["author"];
+        Json::Value@ track = json["track"];
+        Uid = track["mapUid"];
+        TmxId = track["tmxID"];
+        Name = track["name"];
+        Author = track["author"];
 
-        Json::Value@ pvm = json["pvm"];
-        PvmGrade = pvm["grade"];
-        Json::Value@ times = pvm["times"];
+        Json::Value@ tier = json["tier"];
+        PvmGrade = tier["name"];
+        Json::Value@ times = json["timeGoalMappackTrack"];
         for (int i = 0; i < times.Length; i++)
         {
-            medalTimes.InsertLast(times[i]);
-            if (times[i] > 0) hasMedals = true;
+            medalTimes.InsertLast(times[i]["time"]);
+            if (times[i]["time"] > 0) hasMedals = true;
         }
     }
 

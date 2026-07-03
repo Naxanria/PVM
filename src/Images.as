@@ -121,7 +121,7 @@ namespace Images
         return img;
     }
 
-    CachedImage@ GetFromTmxId(int tmxId)
+    CachedImage@ GetFromTmxId(string tmxId)
     {
         if (!Setting::overview_tooltip_thumbnail_use_tmx)
         {
@@ -130,12 +130,12 @@ namespace Images
         return GetFromUrl(GetImageUrl(tmxId), GetImageUrlFallback(tmxId));
     }
 
-    string GetImageUrl(int tmxId)
+    string GetImageUrl(string tmxId)
     {
         return "https://trackmania.exchange/mapimage/" + tmxId + "/1?hq=true";
     }
 
-    string GetImageUrlFallback(int tmxId)
+    string GetImageUrlFallback(string tmxId)
     {
         return "https://trackmania.exchange/mapimage/" + tmxId + "/0?hq=true";
     }

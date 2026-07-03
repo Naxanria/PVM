@@ -44,7 +44,7 @@ namespace Overview
 
             for (int i = 0; i < pvm.labels.Length; i++)
             {
-                float x = Draw::MeasureString(pvm.labels[i].GetFull()).x;
+                float x = UI::MeasureString(pvm.labels[i].GetFull()).x;
                 if (x > maxLabelWidth) maxLabelWidth = x;
             }
 
@@ -73,17 +73,17 @@ namespace Overview
             string sheet = pvm.SheetUrl;
             string discord = pvm.DiscordUrl;
 
-            float spacer = Draw::MeasureString("a").x;
+            float spacer = UI::MeasureString("a").x;
             int x = size.x;
             bool d = false;
             if (sheet != "")
             {
-               x -= Draw::MeasureString(Icons::Kenney::List).x;
+               x -= UI::MeasureString(Icons::Kenney::List).x;
                d = true;
             }
             if (discord != "")
             {
-                x -= Draw::MeasureString(Icons::Discord).x;
+                x -= UI::MeasureString(Icons::Discord).x;
                 d = true;
             }
             UI::SameLine();
@@ -273,7 +273,7 @@ namespace Overview
 
             UI::TableNextColumn();
             vec2 startPos = UI::GetCursorScreenPos();
-            UI::Text(map.Name);
+            UI::Text(Text::OpenplanetFormatCodes(map.Name));
 
             UI::TableNextColumn();
             UI::Text("\\$777by\\$z " + map.Author);
@@ -288,19 +288,19 @@ namespace Overview
             if (Setting::overview_table_show_tmx_id)
             {
                 UI::TableNextColumn();
-                UI::Text(map.TmxId + "");
+                UI::Text(map.TmxId);
 
                 if (UI::IsItemClicked())
                 {
-                    IO::SetClipboard(map.TmxId + "");
-                    UI::ShowNotification("Tmx Id for " + map.Name + " [" + map.TmxId + "] copied to clipboard");
+                    IO::SetClipboard(map.TmxId);
+                    UI::ShowNotification("Tmx Id for " + Text::OpenplanetFormatCodes(map.Name) + " [" + map.TmxId + "] copied to clipboard");
                 }
             }
 
             UI::TableNextColumn();
             if (UI::Button("Play"))
             {   
-                UI::ShowNotification("Loading map " + map.Name);
+                UI::ShowNotification("Loading map " + Text::OpenplanetFormatCodes(map.Name));
                 map.LoadMap();
                 if (Setting::overview_close_on_play)
                 {

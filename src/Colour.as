@@ -6,4 +6,11 @@ namespace Colour
 
     const string FORMAT_AUTHOR_COLOUR = "\\$AAA";
     const string FORMAT_GRADE_COLOUR = "\\$36B";
+
+    const string BRONZE = "964";
+    const string SILVER = "778";
+    const string GOLD = "FC5";
+    const string AUTHOR = "283";
+    const string WARRIOR = "28E";
+    const string CHAMPION = "F57";
 }
