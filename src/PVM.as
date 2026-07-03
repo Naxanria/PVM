@@ -1,6 +1,6 @@
 class PVM
 {
-    int Id;
+    string Id;
     string Name = "Empty";
     string Author;
     string JsonUrl;
@@ -63,21 +63,40 @@ class PVM
 
         Json::Value@ json = API::GetJson(JsonUrl);
 
-        SetupStructure(json["structure"]);
-        LoadMaps(json["maps"]);
+        SetupStructure(json);
+        LoadMaps(json["MappackTrack"]);
 
         Fetching = false;        
 
         return true;
     }
 
+    private array<string> GetMedalFromIndex(int index, int length) {
+        if (length > 5) {
+            if (index == length - 3) return { Icons::Crosshairs, Colour::AUTHOR };
+            if (index == length - 2) return { Icons::Kenney::Badge, Colour::WARRIOR };
+            if (index == length - 1) return { Icons::Kenney::BadgeAlt, Colour::CHAMPION };
+        }
+        if (length > 4) {
+            if (index == length - 2) return  { Icons::Crosshairs, Colour::AUTHOR };
+            if (index == length - 1) return  { Icons::Kenney::BadgeAlt, Colour::CHAMPION };
+        }
+        if (length > 2) {
+            if (index == length - 1) return  { Icons::Crosshairs, Colour::AUTHOR };
+        }
+        if (index == 1) return  { Icons::Circle, Colour::SILVER };
+        if (index == 0) return  { Icons::CircleO, Colour::BRONZE };
+        return  { Icons::Circle, Colour::GOLD };
+    }
+
     private void SetupStructure(Json::Value@ json)
     {
-        Json::Value@ medals = json["medals"];
+        Json::Value@ medals = json["timeGoals"];
         for (int i = 0; i < medals.Length; i++)
         {
             Json::Value@ medal = medals[i];
-            MedalLabel ml = MedalLabel(i, medal["name"], medal["colour"], medal["icon"]);
+            array<string> defaultMedal = GetMedalFromIndex(i, medals.Length);
+            MedalLabel ml = MedalLabel(i, medal["name"], defaultMedal[1], defaultMedal[0]);
             labels.InsertLast(ml);
         }
     }
@@ -165,7 +184,7 @@ class PVM
             {   
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text(currentMap.Name);
+                UI::Text(Text::OpenplanetFormatCodes(currentMap.Name));
             }
 
             if (Setting::pvm_header_map_author)
@@ -355,7 +374,7 @@ class PVM
         if (currentSearch == "") return true;
         string s = currentSearch.Trim().ToLower();
         return map.Author.Trim().ToLower().Contains(s) || 
-            map.Name.Trim().ToLower().Contains(s);
+            Text::StripFormatCodes(map.Name).Trim().ToLower().Contains(s);
     }
 
     MapData@[] GetSortedList()
@@ -374,12 +393,13 @@ namespace PVM
     PVM@ FromJson(Json::Value@ json)
     {
         PVM pvm = PVM();
-        pvm.Id = json["id"];
+        string pvm_id = json["id"];
+        pvm.Id = pvm_id;
         pvm.Name = json["name"];
-        pvm.Author = json["author"];
-        pvm.JsonUrl = json["json"];
-        pvm.SheetUrl = json["sheet"];
-        pvm.DiscordUrl = json["discord"];
+        pvm.Author = json["organization"];
+        pvm.JsonUrl = PVM_MAPPACK_URL + "/" + pvm_id;
+        pvm.SheetUrl = json["sheeturl"];
+        pvm.DiscordUrl = json["discordurl"];
 
         return @pvm;
     }

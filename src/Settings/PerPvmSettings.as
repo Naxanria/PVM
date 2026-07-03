@@ -33,7 +33,7 @@ namespace Setting
             return pvm.Name;
         }
 
-        int GetId()
+        string GetId()
         {
             return pvm.Id;
         }
@@ -104,11 +104,6 @@ namespace Setting
         initialized = true;
     }
 
-    bool PvmShowMedal(int pvmId, int medalIndex)
-    {
-        return PvmShowMedal(pvmId + "", medalIndex);
-    }
-
     bool PvmShowMedal(string pvmId, int medalIndex)
     {
         if (!perPvmSettings.Exists(pvmId)) return true; // show medal as default
@@ -122,7 +117,7 @@ namespace Setting
         Json::Value obj = Json::Object();
         for (int i = 0; i < pvms.Length; i++)
         {
-            int id = pvms[i].Id;
+            string id = pvms[i].Id;
             PerPvmSettings@ setting = GetPvmSettings(id);
             obj[id + ""] = setting.ToJson();
         }
@@ -143,9 +138,9 @@ namespace Setting
             // first load
             for (int i = 0; i < pvms.Length; i++)
             {
-                int id = pvms[i].Id;
+                string id = pvms[i].Id;
                 PerPvmSettings@ setting = GetPvmSettings(id);
-                obj[id + ""] = setting.ToJson();
+                obj[id] = setting.ToJson();
             }
             _pvmSettingsJson = Json::Write(obj);
         }
@@ -154,16 +149,11 @@ namespace Setting
             Json::Value obj = Json::Parse(_pvmSettingsJson);
             for (int i = 0; i < pvms.Length; i++)
             {
-                int id = pvms[i].Id;
+                string id = pvms[i].Id;
                 PerPvmSettings@ setting = GetPvmSettings(id);
-                setting.LoadFromJson(obj[id + ""]);
+                setting.LoadFromJson(obj[id]);
             }
         }
-    }
-
-    PerPvmSettings@ GetPvmSettings(int id)
-    {
-        return GetPvmSettings(id + "");
     }
 
     PerPvmSettings@ GetPvmSettings(string id)
@@ -172,19 +162,19 @@ namespace Setting
         return cast<PerPvmSettings@>(perPvmSettings[id]);
     }
 
-    bool PvmIsEnabled(int id)
+    bool PvmIsEnabled(string id)
     {
         auto s = GetPvmSettings(id);
         if (s.empty) return true;
         return s.IsEnabled();
     }
 
-    void PvmSetEnabled(int id, bool enabled)
+    void PvmSetEnabled(string id, bool enabled)
     {
         GetPvmSettings(id).SetEnabled(enabled);
     }
 
-    void PvmToggleEnabled(int id)
+    void PvmToggleEnabled(string id)
     {
         PerPvmSettings@ settings = GetPvmSettings(id);
         settings.SetEnabled(!settings.IsEnabled());
