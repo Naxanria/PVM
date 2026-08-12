@@ -8,7 +8,7 @@ class MedalLabel
     MedalLabel()
     { }
 
-    MedalLabel(int idx, string label, string colour, string icon)
+    MedalLabel(int idx, const string &in label, const string &in colour, const string &in icon)
     {
         this.idx = idx;
         this.label = label;

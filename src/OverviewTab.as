@@ -232,7 +232,7 @@ namespace Overview
             UI::EndGroup();
         }
 
-        private void SortLabel(string name, SortMode mode, SortMode inverted)
+        private void SortLabel(const string &in name, SortMode mode, SortMode inverted)
         {
             UI::Text(name + (pvm.GetSortMode() == mode ? Icons::CaretDown : (pvm.GetSortMode() == inverted ? Icons::CaretUp : "")));
             if (UI::IsItemClicked())

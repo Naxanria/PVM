@@ -332,7 +332,7 @@ class PVM
         }
     }
 
-    void UpdateSearch(string search)
+    void UpdateSearch(const string &in search)
     {
         if (search == currentSearch) return;
         currentSearch = search.Trim();

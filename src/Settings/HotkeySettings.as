@@ -18,7 +18,7 @@ namespace Setting
     }
 
 
-    VirtualKey RenderHotKey(string label, VirtualKey key)
+    VirtualKey RenderHotKey(const string &in label, VirtualKey key)
     {
         UI::SetNextItemWidth(200);
         if (UI::BeginCombo(label, key == VirtualKey(0) ? "None" : tostring(key)))

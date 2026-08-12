@@ -104,7 +104,7 @@ namespace Setting
         initialized = true;
     }
 
-    bool PvmShowMedal(string pvmId, int medalIndex)
+    bool PvmShowMedal(const string &in pvmId, int medalIndex)
     {
         if (!perPvmSettings.Exists(pvmId)) return true; // show medal as default
 
@@ -156,25 +156,25 @@ namespace Setting
         }
     }
 
-    PerPvmSettings@ GetPvmSettings(string id)
+    PerPvmSettings@ GetPvmSettings(const string &in id)
     {
         if (!perPvmSettings.Exists(id)) return @PerPvmSettings();
         return cast<PerPvmSettings@>(perPvmSettings[id]);
     }
 
-    bool PvmIsEnabled(string id)
+    bool PvmIsEnabled(const string &in id)
     {
         auto s = GetPvmSettings(id);
         if (s.empty) return true;
         return s.IsEnabled();
     }
 
-    void PvmSetEnabled(string id, bool enabled)
+    void PvmSetEnabled(const string &in id, bool enabled)
     {
         GetPvmSettings(id).SetEnabled(enabled);
     }
 
-    void PvmToggleEnabled(string id)
+    void PvmToggleEnabled(const string &in id)
     {
         PerPvmSettings@ settings = GetPvmSettings(id);
         settings.SetEnabled(!settings.IsEnabled());
