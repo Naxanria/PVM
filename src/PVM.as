@@ -92,7 +92,7 @@ class PVM
     private void SetupStructure(Json::Value@ json)
     {
         Json::Value@ medals = json["timeGoals"];
-        for (int i = 0; i < medals.Length; i++)
+        for (uint i = 0; i < medals.Length; i++)
         {
             Json::Value@ medal = medals[i];
             array<string> defaultMedal = GetMedalFromIndex(i, medals.Length);
@@ -103,7 +103,7 @@ class PVM
 
     private void LoadMaps(Json::Value@ json)
     {
-        for (int i = 0; i < json.Length; i++)
+        for (uint i = 0; i < json.Length; i++)
         {
             MapData@ map = MapData(json[i]);
             maps.InsertLast(map);
@@ -128,7 +128,7 @@ class PVM
 
         if (currentMap.SetPb(pb))
         {
-            for (int i = 0; i < maps.Length; i++)
+            for (uint i = 0; i < maps.Length; i++)
             {
                 if (maps[i].Uid == currentMap.Uid)
                 {
@@ -359,8 +359,8 @@ class PVM
     private MapData@[] FilteredList()
     {
         MapData@[] list = {};
-        for (int i = 0; i < maps.Length; i++)
-        {   
+        for (uint i = 0; i < maps.Length; i++)
+        {
             if (Filtered(maps[i]))
             {
                 list.InsertLast(maps[i]);
@@ -406,7 +406,7 @@ namespace PVM
 
     int Sort(MapData@ a, MapData@ b)
     {
-        if (Overview::activeTab >= 0 && Overview::activeTab < pvms.Length)
+        if (Overview::activeTab >= 0 && Overview::activeTab < int(pvms.Length))
         {
             SortMode mode = pvms[Overview::activeTab].GetSortMode();
 

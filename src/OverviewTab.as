@@ -42,7 +42,7 @@ namespace Overview
 
             startnew(CoroutineFunc(this.SyncPbs));
 
-            for (int i = 0; i < pvm.labels.Length; i++)
+            for (uint i = 0; i < pvm.labels.Length; i++)
             {
                 float x = UI::MeasureString(pvm.labels[i].GetFull()).x;
                 if (x > maxLabelWidth) maxLabelWidth = x;
@@ -59,7 +59,7 @@ namespace Overview
                 return;
             }
 
-            if(syncDone < pvm.maps.Length && pvm.maps.Length > 0)
+            if (uint(syncDone) < pvm.maps.Length && pvm.maps.Length > 0)
             {
                 UI::ProgressBar(float(syncDone) / pvm.maps.Length, vec2(800, 8));
             }
@@ -74,16 +74,16 @@ namespace Overview
             string discord = pvm.DiscordUrl;
 
             float spacer = UI::MeasureString("a").x;
-            int x = size.x;
+            int x = int(size.x);
             bool d = false;
             if (sheet != "")
             {
-               x -= UI::MeasureString(Icons::Kenney::List).x;
+               x -= int(UI::MeasureString(Icons::Kenney::List).x);
                d = true;
             }
             if (discord != "")
             {
-                x -= UI::MeasureString(Icons::Discord).x;
+                x -= int(UI::MeasureString(Icons::Discord).x);
                 d = true;
             }
             UI::SameLine();
@@ -166,7 +166,7 @@ namespace Overview
                 UI::ListClipper clip(mapList.Length);
                 while (clip.Step())
                 {
-                    for (int i = clip.DisplayStart; i < clip.DisplayEnd && i < mapList.Length; i++)
+                    for (int i = clip.DisplayStart; i < Math::Min(clip.DisplayEnd, mapList.Length); i++)
                     {
                         vec4 area = RenderMapInfo(mapList[i]);
 
@@ -337,7 +337,7 @@ namespace Overview
 
             for (int i = map.medalTimes.Length - 1; i >= -1; i--)
             {
-                if (i >= pvm.labels.Length) continue;
+                if (i >= int(pvm.labels.Length)) continue;
                 if (!map.HasMedalTime(i)) continue;
                 
                 UI::SetCursorPosX(x);
@@ -397,7 +397,7 @@ namespace Overview
 
             for (int i = map.medalTimes.Length - 1; i > -1; i--)
             {
-                if (map.pb <= map.medalTimes[i])
+                if (map.pb <= int(map.medalTimes[i]))
                 {
                     return pvm.labels[i].GetIcon();
                 }
@@ -412,13 +412,13 @@ namespace Overview
         void SyncPbs()
         {
             syncDone = 1;
-            int max = 10;
+            const uint max = 10;
 
             int i = 0;
             Logging::Debug("Syncing pvm " + pvm.Name + " pbs");
-            while (i < pvm.maps.Length)
+            while (i < int(pvm.maps.Length))
             {
-                for (int t = 0; t < syncUpdating.Length; t++)
+                for (uint t = 0; t < syncUpdating.Length; t++)
                 {
                     if (!syncUpdating[t].loadingPb)
                     {

@@ -16,7 +16,7 @@ namespace Setting
         PerPvmSettings(PVM@ pvm)
         {
             @this.pvm = pvm;
-            for (int i = 0; i < pvm.labels.Length; i++)
+            for (uint i = 0; i < pvm.labels.Length; i++)
             {
                 medalsEnabled.InsertLast(true);
             }
@@ -51,7 +51,7 @@ namespace Setting
 
         bool IsMedalEnabled(int idx)
         {
-            return (idx >=0 && idx < medalsEnabled.Length) ? medalsEnabled[idx] : false;
+            return (idx >= 0 && uint(idx) < medalsEnabled.Length) ? medalsEnabled[idx] : false;
         }
 
         void LoadFromJson(Json::Value@ json)
@@ -59,7 +59,7 @@ namespace Setting
             Logging::Info("Loading " + pvm.Id);
             if (!json.HasKey("m")) 
             {
-                for (int i = 0; i < medalsEnabled.Length; i++)
+                for (uint i = 0; i < medalsEnabled.Length; i++)
                 {
                     medalsEnabled[i] = true;
                 }
@@ -71,7 +71,7 @@ namespace Setting
             enabled = json["e"];
             pvm.enabled = enabled;
 
-            for (int i = 0; i < list.Length && i < medalsEnabled.Length; i++)
+            for (int i = 0; i < Math::Min(list.Length, medalsEnabled.Length); i++)
             {
                 medalsEnabled[i] = list[i];
             }
@@ -81,7 +81,7 @@ namespace Setting
         {
             Json::Value obj = Json::Object();
             Json::Value list = Json::Array();
-            for (int i = 0; i < medalsEnabled.Length; i++)
+            for (uint i = 0; i < medalsEnabled.Length; i++)
             {
                 list.Add(Json::Value(medalsEnabled[i]));
             }
@@ -97,7 +97,7 @@ namespace Setting
     void Init()
     {
         perPvmSettings = dictionary();
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             perPvmSettings[pvms[i].GetId()] = PerPvmSettings(pvms[i]);
         }
@@ -115,7 +115,7 @@ namespace Setting
     void OnSettingsSave(Settings::Section& section)
     {
         Json::Value obj = Json::Object();
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             string id = pvms[i].Id;
             PerPvmSettings@ setting = GetPvmSettings(id);
@@ -136,7 +136,7 @@ namespace Setting
             Json::Value obj = Json::Object();
 
             // first load
-            for (int i = 0; i < pvms.Length; i++)
+            for (uint i = 0; i < pvms.Length; i++)
             {
                 string id = pvms[i].Id;
                 PerPvmSettings@ setting = GetPvmSettings(id);
@@ -147,7 +147,7 @@ namespace Setting
         else
         {
             Json::Value obj = Json::Parse(_pvmSettingsJson);
-            for (int i = 0; i < pvms.Length; i++)
+            for (uint i = 0; i < pvms.Length; i++)
             {
                 string id = pvms[i].Id;
                 PerPvmSettings@ setting = GetPvmSettings(id);
@@ -191,7 +191,7 @@ namespace Setting
         
         UI::BeginTabBar("pvm_settings_tab_bar");
 
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             PerPvmSettings@ setting = GetPvmSettings(pvms[i].GetId());
             PVM@ pvm = setting.GetPvm();
@@ -208,7 +208,7 @@ namespace Setting
 
                 UI::Text("Show medals: ");
 
-                for (int m = pvm.labels.Length - 1; m >= 0; m--)
+                for (uint m = pvm.labels.Length - 1; m >= 0; m--)
                 {
                     if (m >= setting.medalsEnabled.Length) continue;
                     setting.medalsEnabled[m] = UI::Checkbox(pvm.labels[m].GetFull(), setting.medalsEnabled[m]);

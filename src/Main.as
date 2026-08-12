@@ -21,7 +21,7 @@ void Main()
     {
         if (fullReload)
         {
-            for (int i = 0; i < pvms.Length; i++)
+            for (uint i = 0; i < pvms.Length; i++)
             {
                 pvms[i].ReloadPvmJson();                
             }
@@ -50,7 +50,7 @@ void Main()
                     Logging::Info("Map swapped! " + currentMapUid);
                     bool foundPvm = false;
 
-                    for (int i = 0; i < pvms.Length; i++)
+                    for (uint i = 0; i < pvms.Length; i++)
                     {
                         PVM@ pvm = pvms[i];
                         if (pvm.ContainsMap(currentMapUid))
@@ -111,7 +111,7 @@ void Main()
             @currentPvm = emptyPvm;
         }
 
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             if (pvms[i].ReloadRequested)
             {
@@ -126,7 +126,7 @@ void Main()
 void LoadPvms(Json::Value@ json)
 {
     auto _ = json;
-    for (int i = 0; i < _.Length; i++)
+    for (uint i = 0; i < _.Length; i++)
     {
         PVM@ pvm = PVM::FromJson(_[i]);
         Logging::Info("Found pvm '" + pvm.Name + "' by '" + pvm.Author + "'" + (Logging::IsDebugLogLevel() ? " [" + pvm.Id + "]" : ""));
@@ -142,7 +142,7 @@ void LoadPvmData()
     LoadPvms(@pvmMappackJson);
     
     // load (enabled) pvm
-    for (int i = 0; i < pvms.Length; i++)
+    for (uint i = 0; i < pvms.Length; i++)
     {
         PVM@ pvm = pvms[i];
         pvms[i].LoadPvmJson();
@@ -169,7 +169,7 @@ void RenderMenu()
         {
             Setting::overview_show = true;
         }
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             PVM@ pvm = pvms[i];
             if (UI::BeginMenu(pvm.Name))
