@@ -189,9 +189,9 @@ void RenderMenu()
 {
     if (UI::BeginMenu("\\$FC4" + Icons::Circle + "\\$z PVM"))
     {
-        if (UI::MenuItem(Icons::ListAlt + " Show Overview"))
+        if (UI::MenuItem(Icons::ListAlt + " Show Overview", "", Setting::overview_show))
         {
-            Setting::overview_show = true;
+            Setting::overview_show = !Setting::overview_show;
         }
         for (uint i = 0; i < pvms.Length; i++)
         {
