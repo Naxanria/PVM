@@ -125,6 +125,11 @@ void Main()
 
 void LoadPvms(Json::Value@ json)
 {
+    if (json.GetType() != Json::Type::Array) {
+        Logging::Error("Invalid JSON format for PVMs");
+        return;
+    }
+
     auto _ = json;
     for (uint i = 0; i < _.Length; i++)
     {
@@ -138,7 +143,26 @@ void LoadPvmData()
 {
     Logging::Info("Fetching pvm map pack data from " + PVM_MAPPACK_URL);
 
-    Json::Value@ pvmMappackJson = API::GetJson(PVM_MAPPACK_URL);
+    Json::Value@ pvmMappackJson;
+    int attempts = 0;
+
+    while (attempts <= 4) {
+        @pvmMappackJson = API::GetJson(PVM_MAPPACK_URL);
+
+        if (pvmMappackJson.GetType() == Json::Type::Array) {
+            break;
+        }
+
+        attempts++;
+
+        if (attempts == 4) {
+            Logging::Error("Failed to fetch Mappack JSON after 5 attempts!", true);
+            return;
+        }
+
+        sleep(2000);
+    }
+
     LoadPvms(@pvmMappackJson);
     
     // load (enabled) pvm
