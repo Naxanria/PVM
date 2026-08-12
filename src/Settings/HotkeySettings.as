@@ -42,7 +42,7 @@ namespace Setting
         }
         
         UI::SameLine();
-        if (UI::Button("Reset"))
+        if (UI::Button("Reset##" + label))
         {
             key = VirtualKey(0);
         }
