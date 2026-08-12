@@ -184,6 +184,7 @@ namespace Overview
         private void RenderSearch()
         {
             UI::BeginGroup();
+            UI::AlignTextToFramePadding();
             UI::Text("Search:");
             UI::SameLine();
 
@@ -263,6 +264,7 @@ namespace Overview
 
             UI::TableNextColumn();
             vec2 startPos = UI::GetCursorScreenPos();
+            UI::AlignTextToFramePadding();
             UI::Text(Text::OpenplanetFormatCodes(map.Name));
 
             UI::TableNextColumn();
