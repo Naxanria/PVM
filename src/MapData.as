@@ -28,7 +28,7 @@ class MapData
         Json::Value@ tier = json["tier"];
         PvmGrade = tier["name"];
         Json::Value@ times = json["timeGoalMappackTrack"];
-        for (int i = 0; i < times.Length; i++)
+        for (uint i = 0; i < times.Length; i++)
         {
             medalTimes.InsertLast(times[i]["time"]);
             if (times[i]["time"] > 0) hasMedals = true;
@@ -37,7 +37,7 @@ class MapData
 
     uint GetMedalTime(int medal)
     {
-        if (medal < 0 || medal >= medalTimes.Length)
+        if (medal < 0 || medal >= int(medalTimes.Length))
         {
             return 0;
         }
@@ -69,7 +69,7 @@ class MapData
 
         if (rec !is null)
         {
-            bool better = pb > 0 && rec.Time < pb;
+            bool better = pb > 0 && int(rec.Time) < pb;
             if (pb < 0 && rec.Time > 0 && !better) better = true;
             if (better) pb = rec.Time;
         }

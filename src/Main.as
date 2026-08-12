@@ -21,7 +21,7 @@ void Main()
     {
         if (fullReload)
         {
-            for (int i = 0; i < pvms.Length; i++)
+            for (uint i = 0; i < pvms.Length; i++)
             {
                 pvms[i].ReloadPvmJson();                
             }
@@ -50,7 +50,7 @@ void Main()
                     Logging::Info("Map swapped! " + currentMapUid);
                     bool foundPvm = false;
 
-                    for (int i = 0; i < pvms.Length; i++)
+                    for (uint i = 0; i < pvms.Length; i++)
                     {
                         PVM@ pvm = pvms[i];
                         if (pvm.ContainsMap(currentMapUid))
@@ -111,7 +111,7 @@ void Main()
             @currentPvm = emptyPvm;
         }
 
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             if (pvms[i].ReloadRequested)
             {
@@ -125,8 +125,13 @@ void Main()
 
 void LoadPvms(Json::Value@ json)
 {
+    if (json.GetType() != Json::Type::Array) {
+        Logging::Error("Invalid JSON format for PVMs");
+        return;
+    }
+
     auto _ = json;
-    for (int i = 0; i < _.Length; i++)
+    for (uint i = 0; i < _.Length; i++)
     {
         PVM@ pvm = PVM::FromJson(_[i]);
         Logging::Info("Found pvm '" + pvm.Name + "' by '" + pvm.Author + "'" + (Logging::IsDebugLogLevel() ? " [" + pvm.Id + "]" : ""));
@@ -138,11 +143,30 @@ void LoadPvmData()
 {
     Logging::Info("Fetching pvm map pack data from " + PVM_MAPPACK_URL);
 
-    Json::Value@ pvmMappackJson = API::GetJson(PVM_MAPPACK_URL);
+    Json::Value@ pvmMappackJson;
+    int attempts = 0;
+
+    while (attempts <= 4) {
+        @pvmMappackJson = API::GetJson(PVM_MAPPACK_URL);
+
+        if (pvmMappackJson.GetType() == Json::Type::Array) {
+            break;
+        }
+
+        attempts++;
+
+        if (attempts == 4) {
+            Logging::Error("Failed to fetch Mappack JSON after 5 attempts!", true);
+            return;
+        }
+
+        sleep(2000);
+    }
+
     LoadPvms(@pvmMappackJson);
     
     // load (enabled) pvm
-    for (int i = 0; i < pvms.Length; i++)
+    for (uint i = 0; i < pvms.Length; i++)
     {
         PVM@ pvm = pvms[i];
         pvms[i].LoadPvmJson();
@@ -165,11 +189,11 @@ void RenderMenu()
 {
     if (UI::BeginMenu("\\$FC4" + Icons::Circle + "\\$z PVM"))
     {
-        if (UI::MenuItem(Icons::ListAlt + " Show Overview"))
+        if (UI::MenuItem(Icons::ListAlt + " Show Overview", "", Setting::overview_show))
         {
-            Setting::overview_show = true;
+            Setting::overview_show = !Setting::overview_show;
         }
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             PVM@ pvm = pvms[i];
             if (UI::BeginMenu(pvm.Name))
