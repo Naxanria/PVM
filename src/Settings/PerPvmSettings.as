@@ -131,7 +131,7 @@ namespace Setting
 
     void FinalizeLoadingPvmSettings()
     {
-        if (_pvmSettingsJson == "{}")
+        if (_pvmSettingsJson == "" || _pvmSettingsJson == "{}")
         {
             Json::Value obj = Json::Object();
 
