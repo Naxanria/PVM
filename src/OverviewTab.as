@@ -61,7 +61,7 @@ namespace Overview
 
             if (uint(syncDone) < pvm.maps.Length && pvm.maps.Length > 0)
             {
-                UI::ProgressBar(float(syncDone) / pvm.maps.Length, vec2(800, 8));
+                UI::ProgressBar(float(syncDone) / pvm.maps.Length, vec2(-1, 8));
             }
 
             // UI::Text(GetName() + " by " + GetAuthor());
