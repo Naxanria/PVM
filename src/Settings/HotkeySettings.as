@@ -5,7 +5,7 @@ namespace Setting
     [Setting name="Show PVM Window Hotkey" hidden]
     VirtualKey pvm_window_hotkey_show = VirtualKey(0);
 
-    [SettingsTab name="Hotkeys" icon="Keyboard0"]
+    [SettingsTab name="Hotkeys" icon="KeyboardO"]
     void RenderHotkeySettings()
     {
         if (UI::Button("Reset to default"))
