@@ -93,7 +93,7 @@ namespace Overview
             if (d)
             {
                 UI::SameLine();
-                UI::Text(RepeatString(" ", spacerStringLength - 1));
+                UI::Text(string::Repeat(" ", spacerStringLength - 1));
                 if (discord != "")
                 {
                     UI::SameLine();
@@ -176,16 +176,6 @@ namespace Overview
                 }
                 UI::EndTable();
             }
-        }
-
-        string RepeatString(string s, int repeat)
-        {
-            string r = "";
-            for (int i = 0; i < repeat; i++)
-            {
-                r += s;
-            }
-            return r;
         }
 
         string search = "";
