@@ -33,7 +33,7 @@ namespace Overview
 
     void Load()
     {
-        for (int i = 0; i < pvms.Length; i++)
+        for (uint i = 0; i < pvms.Length; i++)
         {
             if (!Setting::PvmIsEnabled(pvms[i].GetId())) continue;
             tabs.InsertLast(OverviewTab(@pvms[i]));
@@ -92,10 +92,11 @@ namespace Overview
         }
 
         ValidateActiveTab();
-        if (activeTab < 0 || activeTab >= tabs.Length)
+        if (activeTab < 0 || uint(activeTab) >= tabs.Length)
         {
             activeTab = 0;
         }
+
         if (tabs.Length == 0) return;
 
         vec2 size = vec2(800, 600);
@@ -109,9 +110,9 @@ namespace Overview
 
 
             UI::BeginTabBar("pvm_tab_bar");
-            
-            for (int i = 0; i < tabs.Length; i++)
-            {                
+
+            for (uint i = 0; i < tabs.Length; i++)
+            {
                 OverviewTab@ tab = tabs[i];
                 if (!Setting::PvmIsEnabled(tab.GetPvm().GetId()))
                 {
@@ -119,7 +120,7 @@ namespace Overview
                 }
 
                 UI::TabItemFlags flags = UI::TabItemFlags::None;
-                if (firstLoad && activeTab == i)
+                if (firstLoad && activeTab == int(i))
                 {
                     flags = UI::TabItemFlags::SetSelected;
                 }
@@ -128,7 +129,7 @@ namespace Overview
                 {
                     if (firstLoad)
                     {
-                        if (activeTab != i)
+                        if (activeTab != int(i))
                         {
                             UI::EndTabItem();
                             continue;

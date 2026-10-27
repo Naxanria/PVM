@@ -19,7 +19,7 @@ class StatContainer
 
     void Update()
     {
-        for (int m = 0; m < pvm.labels.Length; m++)
+        for (uint m = 0; m < pvm.labels.Length; m++)
         {
             counts.InsertLast(0);
         }
@@ -55,7 +55,7 @@ class StatContainer
 
         for (int i = map.medalTimes.Length - 1; i >= 0; i--)
         {
-            if (map.pb <= map.medalTimes[i]) return i;
+            if (map.pb <= int(map.medalTimes[i])) return i;
         }
 
         return -1;
@@ -69,7 +69,7 @@ class StatContainer
         RenderStat(GetTotal() - finished, Medals::Unfinished); // unfinished
         RenderStat(finished, Medals::NoMedal);
 
-        for (int i = 0; i < pvm.labels.Length; i++)
+        for (uint i = 0; i < pvm.labels.Length; i++)
         {
             RenderStat(counts[i], pvm.labels[i]);
         }
