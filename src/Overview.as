@@ -104,9 +104,15 @@ namespace Overview
         UI::SetNextWindowSize(int(size.x), int(size.y));
         UI::SetNextWindowPos(int(pos.x), int(pos.y));
 
-        if (UI::Begin("PVM Overview", Setting::overview_show))
+        bool open = true;
+        if (UI::Begin("PVM Overview", open))
         {
-
+            if (!open)
+            {
+                Setting::overview_show = false;
+                UI::End();
+                return;
+            }
 
             UI::BeginTabBar("pvm_tab_bar");
             
