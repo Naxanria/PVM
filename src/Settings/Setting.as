@@ -31,6 +31,8 @@ namespace Setting
 
     [Setting name="show_overview" hidden category="Overview"]
     bool overview_show = true;
+    [Setting name="Hide overview when Interface is hidden" category="Overview"]
+    bool overview_hide_on_interface_hidden = false;
     [Setting name="Close overview when loading map" category="Overview"]
     bool overview_close_on_play = true;
     [Setting name="Show tooltip" category="Overview"]
