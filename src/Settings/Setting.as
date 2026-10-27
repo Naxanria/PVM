@@ -4,6 +4,8 @@ namespace Setting
     bool pvm_show = true;
     [Setting name="Hide when Interface is hidden" category="PVM"]
     bool pvm_hide_on_interface_hidden = true;
+    [Setting name="Hide while Ultimate Medals Extended is active" category="PVM"]
+    bool pvm_hide_while_ume_active = false;
     [Setting name="Show map name" category="PVM"]
     bool pvm_header_map_name = true;
     [Setting name="Show author name" category="PVM"]

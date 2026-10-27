@@ -6,3 +6,4 @@ version = "0.2.2"
 
 [script]
 dependencies = ["NadeoServices"]
+optional_dependencies = ["UltimateMedalsExtended"]

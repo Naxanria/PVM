@@ -64,6 +64,7 @@ class TimeGoal
 #if DEPENDENCY_ULTIMATEMEDALSEXTENDED
 array<string> umeMedalNames = {};
 bool umeRegistered = false;
+string umeCurrentPvmId = "";
 
 class PvmUmeMedal : UltimateMedalsExtended::IMedal
 {
@@ -122,7 +123,7 @@ PVM@ GetPvmByMapUid(const string &in uid)
     return null;
 }
 
-void UnregisterUmeMedals()
+void OnDestroyedUME()
 {
     for (uint i = 0; i < umeMedalNames.Length; i++)
     {
@@ -130,28 +131,60 @@ void UnregisterUmeMedals()
     }
 
     umeMedalNames.RemoveRange(0, umeMedalNames.Length);
+    umeCurrentPvmId = "";
     umeRegistered = false;
 }
 
-void RegisterUmeMedals()
+void RegisterUME()
 {
-    if (umeRegistered) return;
-
-    UnregisterUmeMedals();
-
-    for (uint i = 0; i < pvms.Length; i++)
+    if (currentPvm.IsEmpty())
     {
-        PVM@ pvm = pvms[i];
-        for (uint j = 0; j < pvm.labels.Length; j++)
+        if (umeRegistered)
         {
-            string medalName = pvm.Name + " - " + pvm.labels[j].GetName();
-            UltimateMedalsExtended::AddMedal(PvmUmeMedal(medalName, pvm.labels[j].GetIcon(), pvm.labels[j].id));
-            umeMedalNames.InsertLast(medalName);
+            OnDestroyedUME();
         }
+        return;
     }
 
+    if (umeRegistered && umeCurrentPvmId == currentPvm.Id)
+    {
+        return;
+    }
+
+    OnDestroyedUME();
+
+    for (uint j = 0; j < currentPvm.labels.Length; j++)
+    {
+        string medalName = currentPvm.Name + " - " + currentPvm.labels[j].GetName();
+        UltimateMedalsExtended::AddMedal(PvmUmeMedal(medalName, currentPvm.labels[j].GetIcon(), currentPvm.labels[j].id));
+        umeMedalNames.InsertLast(medalName);
+    }
+
+    umeCurrentPvmId = currentPvm.Id;
     umeRegistered = true;
 }
+
+void SyncUmeState()
+{
+    if (currentPvm.IsEmpty())
+    {
+        if (umeRegistered)
+        {
+            OnDestroyedUME();
+        }
+        return;
+    }
+
+    if (umeRegistered && umeCurrentPvmId == currentPvm.Id)
+    {
+        return;
+    }
+
+    RegisterUME();
+}
+#else
+void RegisterUME() {}
+void OnDestroyedUME() {}
 #endif
 
 namespace Medals

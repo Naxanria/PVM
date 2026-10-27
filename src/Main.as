@@ -7,6 +7,28 @@ PVM@ currentPvm = emptyPvm;
 
 bool fullReload = false;
 
+void ResolveCurrentPvmForUid(const string &in uid)
+{
+    currentMapUid = uid;
+    @currentPvm = emptyPvm;
+
+    if (uid == "")
+    {
+        return;
+    }
+
+    for (uint i = 0; i < pvms.Length; i++)
+    {
+        PVM@ pvm = pvms[i];
+        if (pvm.ContainsMap(uid))
+        {
+            @currentPvm = pvm;
+            currentPvm.UpdateMap(uid);
+            return;
+        }
+    }
+}
+
 void Main()
 {
     auto app = cast<CTrackMania>(GetApp());
@@ -43,39 +65,8 @@ void Main()
         {
             if (network.ClientManiaAppPlayground !is null)
             {
-                if (currentMapUid != map.MapInfo.MapUid) 
-                {
-                    currentMapUid = map.MapInfo.MapUid;
+                ResolveCurrentPvmForUid(map.MapInfo.MapUid);
 
-                    Logging::Info("Map swapped! " + currentMapUid);
-                    bool foundPvm = false;
-
-                    for (uint i = 0; i < pvms.Length; i++)
-                    {
-                        PVM@ pvm = pvms[i];
-                        if (pvm.ContainsMap(currentMapUid))
-                        {
-                            @currentPvm = pvm;
-                            currentPvm.UpdateMap(currentMapUid);
-                            foundPvm = true;
-                            break;
-                        }
-                    }
-
-                    if (!foundPvm)
-                    {
-                        @currentPvm = emptyPvm;
-                    }
-
-                    if (!currentPvm.IsEmpty() && currentPvm.currentMap.Uid != currentMapUid)
-                    {
-                        @currentPvm = emptyPvm;
-                    }
-                }
-                if (!currentPvm.IsEmpty() && currentMapUid != currentPvm.currentMap.Uid)
-                {
-                    @currentPvm = emptyPvm;
-                }
                 if (!currentPvm.IsEmpty())
                 {
                     auto userMgr = network.ClientManiaAppPlayground.UserMgr;
@@ -100,16 +91,15 @@ void Main()
             }
             else
             {
-                currentPvm.UpdateMap("");
-                @currentPvm = emptyPvm;
+                ResolveCurrentPvmForUid("");
             }
         }
         else
         {
-            currentMapUid = "";
-            currentPvm.UpdateMap("");
-            @currentPvm = emptyPvm;
+            ResolveCurrentPvmForUid("");
         }
+
+        SyncUmeState();
 
         for (uint i = 0; i < pvms.Length; i++)
         {
@@ -144,7 +134,7 @@ void LoadPvmData()
 #if DEPENDENCY_ULTIMATEMEDALSEXTENDED
     if (umeRegistered)
     {
-        UnregisterUmeMedals();
+        OnDestroyedUME();
     }
 #endif
 
@@ -191,9 +181,7 @@ void LoadPvmData()
     Setting::Init();
     Setting::FinalizeLoadingPvmSettings();
 
-#if DEPENDENCY_ULTIMATEMEDALSEXTENDED
-    RegisterUmeMedals();
-#endif
+    SyncUmeState();
 }
 
 void RenderMenu()
@@ -254,9 +242,13 @@ void Render()
 {
     if (fullReload) return;
 
+#if DEPENDENCY_ULTIMATEMEDALSEXTENDED
+    bool shouldHidePvmWidget = Setting::pvm_hide_while_ume_active && umeRegistered;
+#else
+    bool shouldHidePvmWidget = false;
+#endif
 
-
-    if (Setting::pvm_show && !currentPvm.IsEmpty() && currentPvm.enabled)
+    if (!shouldHidePvmWidget && Setting::pvm_show && !currentPvm.IsEmpty() && currentPvm.enabled)
     {
         currentPvm.Render();
     }
@@ -279,9 +271,7 @@ void OnSettingsSave(Settings::Section& section)
 
 void OnDestroyed()
 {
-#if DEPENDENCY_ULTIMATEMEDALSEXTENDED
-    UnregisterUmeMedals();
-#endif
+    OnDestroyedUME();
 }
 
 bool keyHeld = false;
