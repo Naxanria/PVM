@@ -9,7 +9,7 @@ class PVM
 
     bool enabled = true;
 
-    MedalLabel@[] labels;
+    Medal@[] labels;
     MapData@[] maps;
     dictionary uidToMap = {};  
 
@@ -96,7 +96,8 @@ class PVM
         {
             Json::Value@ medal = medals[i];
             array<string> defaultMedal = GetMedalFromIndex(i, medals.Length);
-            MedalLabel ml = MedalLabel(i, medal["name"], defaultMedal[1], defaultMedal[0]);
+            TimeGoal timeGoal = TimeGoal(i, medal["name"], defaultMedal[1], defaultMedal[0]);
+            Medal ml = Medal(timeGoal.id, timeGoal.name, defaultMedal[1], defaultMedal[0]);
             labels.InsertLast(ml);
         }
     }
@@ -248,7 +249,7 @@ class PVM
         }
     }
 
-    private bool InsertPb(int pb, MedalLabel@ label, bool force = false)
+    private bool InsertPb(int pb, Medal@ label, bool force = false)
     {
         if (force)
         {
@@ -257,22 +258,22 @@ class PVM
 
         if (pb <= 0) return false;
 
-        int medalTime = currentMap.GetMedalTime(label.idx);
+        int medalTime = currentMap.GetMedalTime(label.id);
         if (pb > medalTime) return false; // slower pb, or if no such medal (medalTime will be 0 then)
 
         MedalEntry(label, pb, true);
         return true;
     }
 
-    private void RenderMedal(MedalLabel@ label)
+    private void RenderMedal(Medal@ label)
     {
         // todo: check if medal is enabled to show
-        int medalTime = currentMap.GetMedalTime(label.idx);
+        int medalTime = currentMap.GetMedalTime(label.id);
         if (medalTime <= 0) return;
         MedalEntry(label, medalTime);
     }
 
-    private void MedalEntry(MedalLabel@ label, int medalTime, bool isPb = false) 
+    private void MedalEntry(Medal@ label, int medalTime, bool isPb = false)
     {
         UI::TableNextRow();
         UI::TableNextColumn();
@@ -282,7 +283,7 @@ class PVM
         {
             UI::TableNextColumn();
             if (isPb) UI::Text(Colour::TIME_PERSONAL_BEST + "PB");
-            else UI::Text(label.GetLabel());
+            else UI::Text(label.GetName());
         }
 
         UI::TableNextColumn();

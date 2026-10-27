@@ -1,39 +1,68 @@
-class MedalLabel
+class Medal
 {
-    int idx;
-    string label;
-    string colour;
+    int id;
+    string name;
+    string color;
     string icon;
 
-    MedalLabel()
+    Medal()
     { }
 
-    MedalLabel(int idx, const string &in label, const string &in colour, const string &in icon)
+    Medal(int id, const string &in name, const string &in color, const string &in icon)
     {
-        this.idx = idx;
-        this.label = label;
-        this.colour = "\\$" + colour;
+        this.id = id;
+        this.name = name;
+        this.color = "\\$" + color;
         this.icon = icon;
     }
 
-    string GetLabel()
+    string GetName()
     {
-        return label;
+        return name;
     }
 
     string GetIcon()
     {
-        return colour + icon;
+        return color + icon;
     }
 
     string GetFull(bool resetColour = true)
     {
-        return GetIcon() + (resetColour ? "\\$z" : "") + " " + GetLabel();
+        return GetIcon() + (resetColour ? "\\$z" : "") + " " + GetName();
+    }
+}
+
+class TimeGoal
+{
+    int id;
+    string name;
+    string color;
+    string icon;
+
+    TimeGoal()
+    { }
+
+    TimeGoal(int id, const string &in name, const string &in color, const string &in icon)
+    {
+        this.id = id;
+        this.name = name;
+        this.color = "\\$" + color;
+        this.icon = icon;
+    }
+
+    string GetName()
+    {
+        return name;
+    }
+
+    string GetIcon()
+    {
+        return color + icon;
     }
 }
 
 namespace Medals
 {
-    MedalLabel Unfinished = MedalLabel(-1, "Unfinished", "888", Icons::Kenney::Radio);
-    MedalLabel NoMedal = MedalLabel(-1, "Finished", "444", Icons::Circle);
+    Medal Unfinished = Medal(-1, "Unfinished", "888", Icons::Kenney::Radio);
+    Medal NoMedal = Medal(-1, "Finished", "444", Icons::Circle);
 }

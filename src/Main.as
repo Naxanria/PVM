@@ -7,6 +7,99 @@ PVM@ currentPvm = emptyPvm;
 
 bool fullReload = false;
 
+#if DEPENDENCY_ULTIMATEMEDALSEXTENDED
+array<string> umeMedalNames = {};
+bool umeRegistered = false;
+
+class PvmUmeMedal : UltimateMedalsExtended::IMedal
+{
+    private string medalName;
+    private string medalIcon;
+    private int goalId;
+    private string currentUid;
+
+    PvmUmeMedal(const string &in medalName, const string &in medalIcon, int goalId)
+    {
+        this.medalName = medalName;
+        this.medalIcon = medalIcon;
+        this.goalId = goalId;
+        this.currentUid = "";
+    }
+
+    UltimateMedalsExtended::Config GetConfig() override
+    {
+        UltimateMedalsExtended::Config config;
+        config.defaultName = medalName;
+        config.icon = medalIcon;
+        return config;
+    }
+
+    void UpdateMedal(const string &in uid) override
+    {
+        currentUid = uid;
+    }
+
+    bool HasMedalTime(const string &in uid) override
+    {
+        if (uid == "") return false;
+        PVM@ pvm = GetPvmByMapUid(uid);
+        if (pvm is null || pvm.currentMap is null || pvm.currentMap.Uid != uid) return false;
+        return pvm.currentMap.GetMedalTime(goalId) > 0;
+    }
+
+    uint GetMedalTime() override
+    {
+        if (currentUid == "") return 0;
+        PVM@ pvm = GetPvmByMapUid(currentUid);
+        if (pvm is null || pvm.currentMap is null) return 0;
+        return pvm.currentMap.GetMedalTime(goalId);
+    }
+}
+
+PVM@ GetPvmByMapUid(const string &in uid)
+{
+    for (uint i = 0; i < pvms.Length; i++)
+    {
+        if (pvms[i].ContainsMap(uid))
+        {
+            return pvms[i];
+        }
+    }
+    return null;
+}
+
+void UnregisterUmeMedals()
+{
+    for (uint i = 0; i < umeMedalNames.Length; i++)
+    {
+        UltimateMedalsExtended::RemoveMedal(umeMedalNames[i]);
+    }
+
+    umeMedalNames.RemoveRange(0, umeMedalNames.Length);
+    umeRegistered = false;
+}
+
+void RegisterUmeMedals()
+{
+    if (umeRegistered) return;
+
+    UnregisterUmeMedals();
+
+    for (uint i = 0; i < pvms.Length; i++)
+    {
+        PVM@ pvm = pvms[i];
+        for (uint j = 0; j < pvm.labels.Length; j++)
+        {
+            string medalName = pvm.Name + " - " + pvm.labels[j].GetName();
+            UltimateMedalsExtended::AddMedal(PvmUmeMedal(medalName, pvm.labels[j].GetIcon(), pvm.labels[j].id));
+            umeMedalNames.InsertLast(medalName);
+        }
+    }
+
+    umeRegistered = true;
+}
+#endif
+
 void Main()
 {
     auto app = cast<CTrackMania>(GetApp());
@@ -141,6 +234,13 @@ void LoadPvms(Json::Value@ json)
 
 void LoadPvmData()
 {
+#if DEPENDENCY_ULTIMATEMEDALSEXTENDED
+    if (umeRegistered)
+    {
+        UnregisterUmeMedals();
+    }
+#endif
+
     Logging::Info("Fetching pvm map pack data from " + PVM_MAPPACK_URL);
 
     Json::Value@ pvmMappackJson;
@@ -183,6 +283,10 @@ void LoadPvmData()
     Overview::Reload();
     Setting::Init();
     Setting::FinalizeLoadingPvmSettings();
+
+#if DEPENDENCY_ULTIMATEMEDALSEXTENDED
+    RegisterUmeMedals();
+#endif
 }
 
 void RenderMenu()
@@ -264,6 +368,13 @@ void OnSettingsLoad(Settings::Section& section)
 void OnSettingsSave(Settings::Section& section)
 {
     Setting::OnSettingsSave(section);
+}
+
+void OnDestroyed()
+{
+#if DEPENDENCY_ULTIMATEMEDALSEXTENDED
+    UnregisterUmeMedals();
+#endif
 }
 
 bool keyHeld = false;
