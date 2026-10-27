@@ -78,6 +78,7 @@ namespace Overview
     void Render()
     {
         if (!Setting::overview_show) return;
+        if (Setting::overview_hide_on_interface_hidden && !UI::IsGameUIVisible()) return;
         if (!initialized) Init();
 
         if (needsRefresh)
