@@ -77,14 +77,14 @@ class StatContainer
         UI::EndGroup();
     }
 
-    private void RenderStat(int amount, MedalLabel@ label)
+    private void RenderStat(int amount, Medal@ label)
     {
         UI::SameLine();
         UI::Text(label.GetIcon() + "\\$z (" + amount + "/" + GetTotal() + ")");
         if (UI::IsItemHovered())
         {
             UI::BeginTooltip();
-            UI::Text(label.GetLabel());
+            UI::Text(label.GetName());
             UI::EndTooltip();
         }
     }
