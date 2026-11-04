@@ -57,7 +57,7 @@ namespace Setting
 
         void LoadFromJson(Json::Value@ json)
         {
-            Logging::Info("Loading " + pvm.Id);
+            Logging::Debug("PVM " + pvm.Name + " [" + pvm.Id + "] loaded saved settings");
             if (!json.HasKey("m")) 
             {
                 for (uint i = 0; i < medalsEnabled.Length; i++)

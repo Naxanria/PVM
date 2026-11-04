@@ -48,7 +48,7 @@ namespace Overview
             return;
         }
 
-        if (activeTab < 0 || activeTab >= tabs.Length)
+        if (activeTab < 0 || activeTab >= int(tabs.Length))
         {
             activeTab = 0;
         }
@@ -66,7 +66,7 @@ namespace Overview
             return;
         }
 
-        if (activeTab < 0 || activeTab >= tabs.Length)
+        if (activeTab < 0 || activeTab >= int(tabs.Length))
         {
             activeTab = 0;
             return;

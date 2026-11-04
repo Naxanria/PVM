@@ -35,7 +35,8 @@ namespace Overview
                 UI::TableSetupColumn("", UI::TableColumnFlags::WidthFixed, 56.0f);
 
                 UI::TableNextRow();
-                for (uint i = 0; i < 7 + (Setting::overview_table_show_tmx_id ? 1 : 0); i++)
+                uint columnCount = 7 + (Setting::overview_table_show_tmx_id ? 1 : 0);
+                for (uint i = 0; i < columnCount; i++)
                 {
                     UI::TableNextColumn();
                     string label = "";

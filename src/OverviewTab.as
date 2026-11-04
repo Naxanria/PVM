@@ -161,7 +161,7 @@ namespace Overview
 
         private void Init()
         {
-            Logging::Debug("Initializing pvm tab " + pvm.Name);
+            Logging::Debug(pvm.GetLogIdentity() + " initializing overview tab");
             if (initialized) return;
 
             stats.Reset();
@@ -427,7 +427,7 @@ namespace Overview
             const uint max = 10;
 
             int i = 0;
-            Logging::Debug("Syncing pvm " + pvm.Name + " pbs");
+            Logging::Debug(pvm.GetLogIdentity() + " syncing personal bests");
             while (i < int(pvm.maps.Length))
             {
                 for (uint t = 0; t < syncUpdating.Length; t++)

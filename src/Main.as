@@ -86,7 +86,6 @@ void Main()
 
                     currentPvm.UpdatePb(pb);
                     //currentPvm.currentMap.SetPb(pb);
-                    //Logging::Info("New pb: " + Utils::ReadableTime(pb) + " [" + pb + "]");
                 }
             }
             else
@@ -105,7 +104,11 @@ void Main()
         {
             if (pvms[i].ReloadRequested)
             {
-                pvms[i].LoadPvmJson();                
+                if (pvms[i].LoadPvmJson())
+                {
+                    Overview::Reload();
+                    Logging::Info("PVM " + pvms[i].Name + " by " + pvms[i].Author);
+                }
             }
         }
 
@@ -116,7 +119,7 @@ void Main()
 void LoadPvms(Json::Value@ json)
 {
     if (json.GetType() != Json::Type::Array) {
-        Logging::Error("Invalid JSON format for PVMs");
+        Logging::Error("PVM mappacks [all] invalid JSON format");
         return;
     }
 
@@ -124,7 +127,7 @@ void LoadPvms(Json::Value@ json)
     for (uint i = 0; i < _.Length; i++)
     {
         PVM@ pvm = PVM::FromJson(_[i]);
-        Logging::Info("Found pvm '" + pvm.Name + "' by '" + pvm.Author + "'" + (Logging::IsDebugLogLevel() ? " [" + pvm.Id + "]" : ""));
+        Logging::Debug(pvm.GetLogIdentity() + " found in mappack list; author=" + pvm.Author);
         pvms.InsertLast(pvm);
     }
 }
@@ -138,7 +141,7 @@ void LoadPvmData()
     }
 #endif
 
-    Logging::Info("Fetching pvm map pack data from " + PVM_MAPPACK_URL);
+    Logging::Info("Loading PVM mappacks [all]");
 
     Json::Value@ pvmMappackJson;
     int attempts = 0;
@@ -153,7 +156,7 @@ void LoadPvmData()
         attempts++;
 
         if (attempts == 4) {
-            Logging::Error("Failed to fetch Mappack JSON after 5 attempts!", true);
+            Logging::Error("PVM mappacks [all] failed to load after 5 attempts", true);
             return;
         }
 
@@ -161,20 +164,16 @@ void LoadPvmData()
     }
 
     LoadPvms(@pvmMappackJson);
+    Logging::Info("Loaded PVM mappacks [all] successfully");
     
     // load (enabled) pvm
     for (uint i = 0; i < pvms.Length; i++)
     {
         PVM@ pvm = pvms[i];
-        pvms[i].LoadPvmJson();
-        if (Logging::IsDebugLogLevel())
-        {
-            Logging::Debug("Loaded pvm '" + pvm.Name + "[" + pvm.Id + "]' with " + pvm.maps.Length + " maps");
-        }
-        else 
-        { 
-            Logging::Info("Loaded pvm '" + pvm.Name + "' with " + pvm.maps.Length + " maps");
-        }
+        bool loaded = pvms[i].LoadPvmJson();
+        if (!loaded) continue;
+
+        Logging::Info("PVM " + pvm.Name + " by " + pvm.Author);
     } 
 
     Overview::Reload();
@@ -192,6 +191,11 @@ void RenderMenu()
         {
             Setting::overview_show = !Setting::overview_show;
         }
+        if (UI::MenuItem(Icons::Recycle + " Reload all mappacks", "", fullReload, !fullReload))
+        {
+            fullReload = true;
+            UI::ShowNotification("Reloading all PVM mappacks");
+        }
         for (uint i = 0; i < pvms.Length; i++)
         {
             PVM@ pvm = pvms[i];
@@ -206,16 +210,11 @@ void RenderMenu()
                 {
                     Overview::OpenPvm(pvm.Id, true);
                 }
-
-                // todo: add reload
-                // if(UI::MenuItem("\\$0f0" + Icons::Recycle + "\\$z Reload"))
-                // {
-                //     if (!pvm.Fetching)
-                //     {
-                //         UI::ShowNotification("Reloading the " + pvm.Name + " pvm");
-                //         pvm.ReloadPvmJson();
-                //     }
-                // }
+                if (UI::MenuItem(Icons::Recycle + " Reload mappack", "", false, !pvm.Fetching && !pvm.ReloadRequested))
+                {
+                    pvm.ReloadPvmJson();
+                    UI::ShowNotification("Reloading " + pvm.Name);
+                }
 
                 if (pvm.SheetUrl != "")
                 {
@@ -228,12 +227,6 @@ void RenderMenu()
             }
         }
 
-        // todo: add full reload
-        // if (UI::MenuItem("\\$0f0" + Icons::Recycle + "\\$z Full Reload"))
-        // {
-        //     fullReload = true;
-        //     UI::ShowNotification("Fully reloading pvm!");
-        // }
         UI::EndMenu();
     }
 }

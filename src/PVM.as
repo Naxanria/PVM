@@ -41,6 +41,11 @@ class PVM
         return Id + "";
     }
 
+    string GetLogIdentity()
+    {
+        return "PVM " + Name + " [" + Id + "]";
+    }
+
     int GetPB()
     {
         return currentMap.pb;
@@ -79,7 +84,7 @@ class PVM
     void UpdateLeaderboardSortMode(LeaderboardSortMode mode)
     {
         if (leaderboardSortMode == mode) return;
-        Logging::Debug("[PVM] Leaderboard sort mode changed from=" + GetLeaderboardSortModeName(leaderboardSortMode) + " to=" + GetLeaderboardSortModeName(mode) + " entries=" + leaderboardEntries.Length + " id=" + Id);
+        Logging::Debug(GetLogIdentity() + " leaderboard sort mode changed from=" + GetLeaderboardSortModeName(leaderboardSortMode) + " to=" + GetLeaderboardSortModeName(mode) + " entries=" + leaderboardEntries.Length);
         leaderboardSortMode = mode;
         RebuildSortedLeaderboardEntries();
     }
@@ -159,7 +164,7 @@ class PVM
             if (sortedSample != "") sortedSample += " | ";
             sortedSample += i + ":position=" + entry.Position + ",points=" + entry.TotalPoints + ",name=" + NormalizePlayerName(entry.PlayerName) + ",rank=" + entry.RankName;
         }
-        Logging::Debug("[PVM] Leaderboard sort applied mode=" + GetLeaderboardSortModeName(leaderboardSortMode) + " filtered=" + filtered.Length + " sorted=" + sortedLeaderboardEntries.Length + " firstRows=[" + sortedSample + "] id=" + Id);
+        Logging::Debug(GetLogIdentity() + " leaderboard sort applied mode=" + GetLeaderboardSortModeName(leaderboardSortMode) + " filtered=" + filtered.Length + " sorted=" + sortedLeaderboardEntries.Length + " firstRows=[" + sortedSample + "]");
     }
 
     private int CompareLeaderboardEntries(LeaderboardEntry@ a, LeaderboardEntry@ b, LeaderboardSortMode mode)
@@ -280,8 +285,8 @@ class PVM
         string normalized = name.ToLower();
         for (uint i = 0; i < tiers.Length; i++)
         {
-            string tierName = Text::StripFormatCodes(tiers[i].Name).Trim();
-            if (tierName.ToLower() == normalized)
+            string candidateTierName = Text::StripFormatCodes(tiers[i].Name).Trim();
+            if (candidateTierName.ToLower() == normalized)
             {
                 return int(i);
             }
@@ -420,11 +425,11 @@ class PVM
         }
 
         leaderboardFetched = true;
-        leaderboardHasMore = json.Length >= leaderboardLimit;
+        leaderboardHasMore = json.Length >= uint(leaderboardLimit);
         leaderboardOffset += int(json.Length);
         leaderboardLoading = false;
         RebuildSortedLeaderboardEntries();
-        Logging::Debug("[PVM] Leaderboard fetch applied received=" + json.Length + " total=" + leaderboardEntries.Length + " hasMore=" + leaderboardHasMore + " id=" + Id);
+        Logging::Debug(GetLogIdentity() + " leaderboard fetch applied received=" + json.Length + " total=" + leaderboardEntries.Length + " hasMore=" + leaderboardHasMore);
     }
 
     string GetRankNameForPoints(int points)
@@ -482,14 +487,14 @@ class PVM
             rankOrderSummary += tier.Name + "(" + tier.PointsNeeded + ")";
         }
 
-        Logging::Debug("[PVM] Loaded API rank thresholds count=" + tiers.Length + " ranks=[" + rankOrderSummary + "] id=" + Id);
+        Logging::Debug(GetLogIdentity() + " loaded API rank thresholds count=" + tiers.Length + " ranks=[" + rankOrderSummary + "]");
     }
 
     private void ResetSourceData()
     {
         if (maps.Length > 0 || labels.Length > 0 || tiers.Length > 0 || leaderboardEntries.Length > 0)
         {
-            Logging::Debug("[PVM] ResetSourceData before: maps=" + maps.Length + " labels=" + labels.Length + " tiers=" + tiers.Length + " leaderboard=" + leaderboardEntries.Length + " sortedList=" + sortedList.Length + " id=" + Id);
+            Logging::Debug(GetLogIdentity() + " resetting source data: maps=" + maps.Length + " labels=" + labels.Length + " tiers=" + tiers.Length + " leaderboard=" + leaderboardEntries.Length + " sortedList=" + sortedList.Length);
         }
         uidToMap = dictionary();
         maps = {};
@@ -506,10 +511,6 @@ class PVM
         sortedListDirty = true;
         currentSearch = "";
         currentLeaderboardSearch = "";
-        if (maps.Length == 0 && labels.Length == 0 && tiers.Length == 0 && leaderboardEntries.Length == 0)
-        {
-            Logging::Debug("[PVM] ResetSourceData after: cleared id=" + Id);
-        }
     }
 
     void ReloadPvmJson()
@@ -520,14 +521,15 @@ class PVM
 
     bool LoadPvmJson()
     {
-        ReloadRequested = false;
+        bool isReload = ReloadRequested;
         if (Fetching)
         {
             return false;
         }
 
+        ReloadRequested = false;
         Fetching = true;
-        Logging::Info("Fetching " + Name + " pvm data from " + JsonUrl);
+        Logging::Info((isReload ? "Reloading PVM " : "Loading PVM ") + Name + " by " + Author);
 
         ResetSourceData();
 
@@ -580,7 +582,7 @@ class PVM
         mapTierOrder = {};
         if (json is null || json.GetType() != Json::Type::Array)
         {
-            Logging::Warn("[PVM] Missing mappackTiers array; tier sorting will use unknown-tier fallback id=" + Id);
+            Logging::Debug(GetLogIdentity() + " missing mappackTiers array; tier sorting will use unknown-tier fallback");
             return;
         }
 
@@ -599,24 +601,24 @@ class PVM
             tierOrderSummary += tierName + "(" + tierId + ")";
         }
 
-        Logging::Debug("[PVM] Loaded ascending backend map tier order count=" + mapTierOrder.Length + " tiers=[" + tierOrderSummary + "] id=" + Id);
+        Logging::Debug(GetLogIdentity() + " loaded ascending backend map tier order count=" + mapTierOrder.Length + " tiers=[" + tierOrderSummary + "]");
     }
 
     private void LoadMaps(Json::Value@ json)
     {
-        Logging::Debug("[PVM] LoadMaps start: incoming=" + json.Length + " existingMaps=" + maps.Length + " id=" + Id);
+        Logging::Debug(GetLogIdentity() + " loading maps: incoming=" + json.Length + " existingMaps=" + maps.Length);
         for (uint i = 0; i < json.Length; i++)
         {
             MapData@ map = MapData(json[i]);
             if (map is null || map.Uid == "")
             {
-                Logging::Debug("[PVM] skipping empty map at index=" + i + " id=" + Id);
+                Logging::Debug(GetLogIdentity() + " skipping empty map at index=" + i);
                 continue;
             }
 
             if (uidToMap.Exists(map.Uid))
             {
-                Logging::Debug("[PVM] duplicate map skipped: uid=" + map.Uid + " id=" + Id);
+                Logging::Debug(GetLogIdentity() + " skipping duplicate map uid=" + map.Uid);
                 continue;
             }
 
@@ -624,7 +626,7 @@ class PVM
             uidToMap[map.Uid] = @map;
         }
         RebuildSortedList();
-        Logging::Debug("[PVM] LoadMaps end: finalMaps=" + maps.Length + " uniqueUidCount=" + uidToMap.GetSize() + " id=" + Id);
+        Logging::Debug(GetLogIdentity() + " loaded maps: count=" + maps.Length + " uniqueUidCount=" + uidToMap.GetSize());
     }
 
     bool ContainsMap(string &in uid)
@@ -864,7 +866,7 @@ class PVM
     void UpdateMapSortMode(MapSortMode mode)
     {
         if (sortMode == mode) return;
-        Logging::Debug("[PVM] Map sort mode changed from=" + GetMapSortModeName(sortMode) + " to=" + GetMapSortModeName(mode) + " maps=" + maps.Length + " id=" + Id);
+        Logging::Debug(GetLogIdentity() + " map sort mode changed from=" + GetMapSortModeName(sortMode) + " to=" + GetMapSortModeName(mode) + " maps=" + maps.Length);
         sortMode = mode;
         RebuildSortedList();
     }
@@ -890,7 +892,7 @@ class PVM
     {
         if (maps is null)
         {
-            Logging::Debug("[PVM] RebuildSortedList null maps; id=" + Id);
+            Logging::Debug(GetLogIdentity() + " cannot rebuild sorted list because maps is null");
             sortedList = {};
             sortedListDirty = false;
             return;
@@ -910,7 +912,7 @@ class PVM
 
             if (seenUids.Exists(map.Uid))
             {
-                Logging::Warn("[PVM] Dropping duplicate map uid=" + map.Uid + " in sort rebuild id=" + Id);
+                Logging::Debug(GetLogIdentity() + " dropping duplicate map uid=" + map.Uid + " in sort rebuild");
                 continue;
             }
 
@@ -918,7 +920,7 @@ class PVM
             rebuilt.InsertLast(map);
         }
 
-        Logging::Debug("[PVM] RebuildSortedList begin sourceCount=" + maps.Length + " filtered=" + rebuilt.Length + " mode=" + GetMapSortModeName(sortMode) + " tierOrderCount=" + mapTierOrder.Length + " search='" + currentSearch + "' id=" + Id);
+        Logging::Debug(GetLogIdentity() + " rebuilding sorted map list: sourceCount=" + maps.Length + " filtered=" + rebuilt.Length + " mode=" + GetMapSortModeName(sortMode) + " tierOrderCount=" + mapTierOrder.Length + " search='" + currentSearch + "'");
 
         uint[] order = {};
         for (uint i = 0; i < rebuilt.Length; i++)
@@ -957,7 +959,7 @@ class PVM
             if (sortedSample != "") sortedSample += " | ";
             sortedSample += i + ":tier=" + map.PvmTier + "#" + map.PvmTierId + ",name=" + Text::StripFormatCodes(map.Name).Trim().ToLower() + ",pb=" + map.pb;
         }
-        Logging::Debug("[PVM] RebuildSortedList applied mode=" + GetMapSortModeName(sortMode) + " sortedListLength=" + sortedList.Length + " firstRows=[" + sortedSample + "] id=" + Id);
+        Logging::Debug(GetLogIdentity() + " sorted map list applied mode=" + GetMapSortModeName(sortMode) + " count=" + sortedList.Length + " firstRows=[" + sortedSample + "]");
     }
 
     private MapData@[] FilteredList()
