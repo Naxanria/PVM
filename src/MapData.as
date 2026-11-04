@@ -5,7 +5,10 @@ class MapData
 
     string Name;
     string Author;
-    string PvmGrade;
+    string PvmTier;
+    int PvmTierId;
+    int TierPoints;
+    string TierColor;
 
     uint[] medalTimes;
 
@@ -26,7 +29,10 @@ class MapData
         Author = track["author"];
 
         Json::Value@ tier = json["tier"];
-        PvmGrade = tier["name"];
+        PvmTier = tier["name"];
+        PvmTierId = int(json["tier_id"]);
+        TierPoints = int(tier["points"]);
+        TierColor = tier["color"];
         Json::Value@ times = json["timeGoalMappackTrack"];
         for (uint i = 0; i < times.Length; i++)
         {

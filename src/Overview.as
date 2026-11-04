@@ -9,14 +9,14 @@ namespace Overview
     bool firstLoad = true;
     bool needsRefresh = false;
 
-    float widthName, widthTime, widthMedal, widthGrade, widthTmxId;
+    float widthName, widthTime, widthMedal, widthTier, widthTmxId;
     
     void Init()
     {
         widthName = UI::MeasureString("AAAAAAAAAAAAAAAAAAAAAAAA").x;
         widthTime = UI::MeasureString("10:59:59.999").x;
         widthMedal = UI::MeasureString(Icons::Circle).x;
-        widthGrade = UI::MeasureString("AAAAAAAAAAAAAAAA").x;
+        widthTier = UI::MeasureString("AAAAAAAAAAAAAAAA").x;
         widthTmxId = UI::MeasureString("399999").x;
         
         initialized = true;
@@ -126,29 +126,9 @@ namespace Overview
                     continue;
                 }
 
-                UI::TabItemFlags flags = UI::TabItemFlags::None;
-                if (firstLoad && activeTab == int(i))
+                if (UI::BeginTabItem(tab.GetName()))
                 {
-                    flags = UI::TabItemFlags::SetSelected;
-                }
-
-                if (UI::BeginTabItem(tab.GetName(), flags))
-                {
-                    if (firstLoad)
-                    {
-                        if (activeTab != int(i))
-                        {
-                            UI::EndTabItem();
-                            continue;
-                        }
-
-                    }
-
-                    firstLoad = false;
-                    activeTab = i;
-                    
                     tab.Render();
-
                     UI::EndTabItem();
                 }
             }

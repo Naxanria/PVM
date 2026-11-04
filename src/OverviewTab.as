@@ -1,12 +1,130 @@
 namespace Overview
 {
+    void PlayMapAction(MapData@ map)
+    {
+        if (map is null) return;
+        UI::ShowNotification("Loading map " + Text::OpenplanetFormatCodes(map.Name));
+        map.LoadMap();
+        if (Setting::overview_close_on_play)
+        {
+            Setting::overview_show = false;
+        }
+    }
+
+    void OpenMapTmxAction(MapData@ map)
+    {
+        if (map is null) return;
+        OpenBrowserURL("https://trackmania.exchange/mapshow/" + map.TmxId);
+    }
+
+    void HandleTableAction(const string &in actionId, MapData@ map)
+    {
+        if (map is null) return;
+
+        if (actionId == "play")
+        {
+            PlayMapAction(map);
+            return;
+        }
+
+        if (actionId == "tmx")
+        {
+            OpenMapTmxAction(map);
+            return;
+        }
+    }
+
+    void RenderMapTooltip(MapData@ map, PVM@ pvm)
+    {
+        if (map is null || pvm is null || !Setting::overview_tooltip_show)
+        {
+            return;
+        }
+
+        if (UI::IsItemHovered())
+        {
+            UI::BeginTooltip();
+
+            if (Setting::overview_tooltip_thumbnail_show)
+            {
+                Images::CachedImage img = Images::GetFromTmxId(map.TmxId);
+                if (img.texture !is null)
+                {
+                    UI::Image(img.texture, Utils::GetResized(img.texture.GetSize(), Setting::overview_tooltip_thumbnail_size));
+                }
+                else
+                {
+                    if (img.error)
+                    {
+                        if (img.unsupportedFormat)
+                        {
+                            UI::Text("\\$f00??");
+                            UI::SameLine();
+                        }
+                        else if (img.notFound)
+                        {
+                            UI::Text("\\$f00404");
+                            UI::SameLine();
+                        }
+                    }
+                    string hg = Utils::GetHourGlass();
+                    UI::Text(hg);
+                }
+            }
+
+            float maxLabelWidth = 0.0f;
+            for (uint i = 0; i < pvm.labels.Length; i++)
+            {
+                float width = UI::MeasureString(pvm.labels[i].GetFull()).x;
+                if (width > maxLabelWidth)
+                {
+                    maxLabelWidth = width;
+                }
+            }
+
+            float x = UI::GetCursorPos().x;
+            for (int i = map.medalTimes.Length - 1; i >= -1; i--)
+            {
+                if (i >= int(pvm.labels.Length)) continue;
+                if (!map.HasMedalTime(i)) continue;
+
+                UI::SetCursorPosX(x);
+                if (Setting::overview_tooltip_medals_show_label)
+                {
+                    UI::Text(pvm.labels[i].GetFull());
+                }
+                else
+                {
+                    UI::Text(pvm.labels[i].GetIcon());
+                }
+                UI::SameLine();
+                if (Setting::overview_tooltip_medals_show_label)
+                {
+                    UI::SetCursorPosX(x + 10.0f + maxLabelWidth);
+                }
+                UI::Text(Utils::ReadableTime(map.GetMedalTime(i)));
+            }
+
+            UI::EndTooltip();
+        }
+    }
+
+    enum DetailTab
+    {
+        Maps,
+        Leaderboard
+    }
+
     class OverviewTab
     {        
         private PVM@ pvm;
         private bool initialized = false;
         private StatContainer stats;
+        private MappackOverview@ mapPackView;
+        private LeaderboardOverview@ leaderboardView;
 
         private float maxLabelWidth = 10;
+        private DetailTab detailTab = DetailTab::Maps;
 
         OverviewTab()
         { }
@@ -15,6 +133,8 @@ namespace Overview
         {
             @this.pvm = pvm;
             stats = StatContainer(pvm);
+            @mapPackView = MappackOverview(@pvm);
+            @leaderboardView = LeaderboardOverview(@pvm);
         }
 
         string GetName()
@@ -95,7 +215,7 @@ namespace Overview
             if (d)
             {
                 UI::SameLine();
-                UI::Text(string::Repeat(" ", spacerStringLength - 1));
+                UI::Text(Text::Repeat(" ", spacerStringLength - 1));
                 if (discord != "")
                 {
                     UI::SameLine();
@@ -118,146 +238,28 @@ namespace Overview
                 }                
             }
 
-            RenderSearch();
+            UI::BeginTabBar("pvm_detail_tab_bar_" + pvm.GetId());
 
-            int tableCount = 6;
-            
-            if (Setting::overview_table_show_tmx_id) tableCount++;
-
-            if (UI::BeginTable("pvm_overview_table_" + GetName(), tableCount, UI::TableFlags::SizingFixedFit | UI::TableFlags::RowBg))
+            if (UI::BeginTabItem("Maps"))
             {
-                UI::TableSetupColumn("name", UI::TableColumnFlags::WidthFixed, widthName);
-                UI::TableSetupColumn("author", UI::TableColumnFlags::WidthStretch);
-                UI::TableSetupColumn("grade", UI::TableColumnFlags::WidthFixed, widthGrade);
-                UI::TableSetupColumn("medal", UI::TableColumnFlags::WidthFixed, widthMedal + widthTime + 1);
-                if (Setting::overview_table_show_tmx_id)
-                {
-                    UI::TableSetupColumn("tmx id", UI::TableColumnFlags::WidthFixed, widthTmxId);
-                }
-                UI::TableSetupColumn("playBtn");
-                UI::TableSetupColumn("tmxBtn");
-                bool shownTooltip = false;
-
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                SortLabel("Name", SortMode::NAME, SortMode::NAME_INVERTED);
-                UI::TableNextColumn();
-                SortLabel("Author", SortMode::AUTHOR, SortMode::AUTHOR_INVERTED);
-                UI::TableNextColumn();
-                UI::Text("Grade");
-                if (UI::IsItemClicked())
-                {
-                    UpdateSortMode(SortMode::DEFAULT);
-                }
-                UI::TableNextColumn();
-                SortLabel("Time", SortMode::TIME, SortMode::TIME_INVERTED);
-
-                if (Setting::overview_table_show_tmx_id)
-                {
-                    UI::TableNextColumn();
-                    UI::Text("Tmx Id");
-                }
-
-                UI::TableNextColumn();
-                UI::Text("");
-                UI::TableNextColumn();
-                UI::Text("");
-                
-                MapData@[] mapList = pvm.GetSortedList();
-
-                UI::ListClipper clip(mapList.Length);
-                while (clip.Step())
-                {
-                    for (int i = clip.DisplayStart; i < Math::Min(clip.DisplayEnd, mapList.Length); i++)
-                    {
-                        vec4 area = RenderMapInfo(mapList[i]);
-
-                        if (!shownTooltip) shownTooltip = Tooltip(mapList[i], area);
-                        //UI::DrawList::AddRect(area, vec4(1, 0, 0, 1));
-                    }
-                }
-                UI::EndTable();
-            }
-        }
-
-        string search = "";
-        int foundCount = 0;
-
-        private void RenderSearch()
-        {
-            UI::BeginGroup();
-            UI::AlignTextToFramePadding();
-            UI::Text("Search:");
-            UI::SameLine();
-
-            string oldsearch = search;
-
-            UI::SetNextItemWidth(128);
-            search = UI::InputText("##", oldsearch, UI::InputTextFlags::EscapeClearsAll);
-
-            // if (search != "")
-            // {
-            //     UI::SameLine();
-            //     if (UI::Button("x"))
-            //     {
-            //         search = "";
-
-            //     }
-            // }
-
-            if (search != oldsearch)
-            {
-                pvm.UpdateSearch(search);
-                if (search != "")
-                {
-                    foundCount = pvm.GetSortedList().Length;
-                }
+                mapPackView.Render();
+                UI::EndTabItem();
             }
 
-            if (search != "")
+            if (UI::BeginTabItem("Leaderboard"))
             {
-                UI::SameLine();
-                string res = "result";
-                if (foundCount != 1) res = "results";
-                UI::Text(foundCount + " " + res);
-            }
-            
-            UI::EndGroup();
-        }
+                if (!pvm.HasLeaderboardData() && !pvm.IsLoadingLeaderboard())
+                {
+                    pvm.LoadLeaderboard();
+                }
 
-        private void SortLabel(const string &in name, SortMode mode, SortMode inverted)
-        {
-            UI::Text(name + (pvm.GetSortMode() == mode ? Icons::CaretDown : (pvm.GetSortMode() == inverted ? Icons::CaretUp : "")));
-            if (UI::IsItemClicked())
-            {
-                if (pvm.GetSortMode() == mode)
-                {
-                    UpdateSortMode(inverted);
-                }
-                else if (pvm.GetSortMode() == inverted)
-                {
-                    UpdateSortMode(SortMode::DEFAULT);
-                }
-                else
-                {
-                    UpdateSortMode(mode);
-                }
+                leaderboardView.Render();
+                UI::EndTabItem();
             }
 
-            if (UI::IsItemHovered())
-            {
-                UI::BeginTooltip();
-                UI::Text("Sort by " + name);
-                UI::EndTooltip();
-            }            
+            UI::EndTabBar();
         }
 
-        void UpdateSortMode(SortMode newMode)
-        {
-            if (pvm.GetSortMode() == newMode) return;
-
-            pvm.UpdateSortMode(newMode);
-        }
 
         private vec4 RenderMapInfo(MapData@ map)
         {
@@ -273,7 +275,7 @@ namespace Overview
             UI::Text("\\$777by\\$z " + map.Author);
 
             UI::TableNextColumn();
-            UI::Text(map.PvmGrade);
+            UI::Text(map.PvmTier);
 
             UI::TableNextColumn();
             string timeText = map.pb <= 0 ? "\\$666 no pb\\$z" : Utils::ReadableTime(map.pb);

@@ -12,8 +12,8 @@ namespace Setting
     bool pvm_header_map_name = true;
     [Setting name="Show author name" category="PVM"]
     bool pvm_header_map_author = true;
-    [Setting name="Show grade" category="PVM"]
-    bool pvm_header_map_grade = true;
+    [Setting name="Show tier" category="PVM"]
+    bool pvm_header_map_tier = true;
     
 
     [Setting name="Lock PVM Window Position" category="PVM"]
