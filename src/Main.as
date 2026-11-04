@@ -198,13 +198,13 @@ void RenderMenu()
             if (!Setting::PvmIsEnabled(pvm.Id)) continue;
             if (UI::BeginMenu(pvm.Name))
             {
-                if (UI::MenuItem(Icons::Eye + " Show " + Utils::CheckIcon(Setting::PvmIsEnabled(pvm.Id))))
+                if (UI::MenuItem(Icons::ListAlt + " Show mappack"))
                 {
-                    Setting::PvmToggleEnabled(pvm.Id);
-                    if (!Setting::PvmIsEnabled(pvm.Id))
-                    {
-                        Overview::needsRefresh = true;
-                    }
+                    Overview::OpenPvm(pvm.Id, false);
+                }
+                if (UI::MenuItem(Icons::ListAlt + " Show leaderboard"))
+                {
+                    Overview::OpenPvm(pvm.Id, true);
                 }
 
                 // todo: add reload

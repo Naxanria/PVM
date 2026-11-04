@@ -125,6 +125,7 @@ namespace Overview
 
         private float maxLabelWidth = 10;
         private DetailTab detailTab = DetailTab::Maps;
+        private bool detailTabSelectionPending = false;
 
         OverviewTab()
         { }
@@ -150,6 +151,12 @@ namespace Overview
         PVM@ GetPvm()
         {
             return @pvm;
+        }
+
+        void SelectDetailTab(bool leaderboard)
+        {
+            detailTab = leaderboard ? DetailTab::Leaderboard : DetailTab::Maps;
+            detailTabSelectionPending = true;
         }
 
         private void Init()
@@ -240,14 +247,22 @@ namespace Overview
 
             UI::BeginTabBar("pvm_detail_tab_bar_" + pvm.GetId());
 
-            if (UI::BeginTabItem("Maps"))
+            int mapsFlags = detailTabSelectionPending && detailTab == DetailTab::Maps
+                ? int(UI::TabItemFlags::SetSelected)
+                : int(UI::TabItemFlags::None);
+            if (UI::BeginTabItem("Maps", mapsFlags))
             {
+                detailTab = DetailTab::Maps;
                 mapPackView.Render();
                 UI::EndTabItem();
             }
 
-            if (UI::BeginTabItem("Leaderboard"))
+            int leaderboardFlags = detailTabSelectionPending && detailTab == DetailTab::Leaderboard
+                ? int(UI::TabItemFlags::SetSelected)
+                : int(UI::TabItemFlags::None);
+            if (UI::BeginTabItem("Leaderboard", leaderboardFlags))
             {
+                detailTab = DetailTab::Leaderboard;
                 if (!pvm.HasLeaderboardData() && !pvm.IsLoadingLeaderboard())
                 {
                     pvm.LoadLeaderboard();
@@ -258,6 +273,7 @@ namespace Overview
             }
 
             UI::EndTabBar();
+            detailTabSelectionPending = false;
         }
 
 

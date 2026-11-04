@@ -8,6 +8,9 @@ namespace Overview
 
     bool firstLoad = true;
     bool needsRefresh = false;
+    bool navigationPending = false;
+    bool requestedLeaderboard = false;
+    string requestedPvmId = "";
 
     float widthName, widthTime, widthMedal, widthTier, widthTmxId;
     
@@ -75,6 +78,14 @@ namespace Overview
         }
     }
 
+    void OpenPvm(const string &in pvmId, bool leaderboard)
+    {
+        Setting::overview_show = true;
+        requestedPvmId = pvmId;
+        requestedLeaderboard = leaderboard;
+        navigationPending = true;
+    }
+
     void Render()
     {
         if (!Setting::overview_show) return;
@@ -96,6 +107,24 @@ namespace Overview
         if (activeTab < 0 || uint(activeTab) >= tabs.Length)
         {
             activeTab = 0;
+        }
+
+        if (navigationPending)
+        {
+            bool foundRequestedPvm = false;
+            for (uint i = 0; i < tabs.Length; i++)
+            {
+                if (tabs[i].GetPvm().GetId() == requestedPvmId)
+                {
+                    activeTab = int(i);
+                    foundRequestedPvm = true;
+                    break;
+                }
+            }
+            if (!foundRequestedPvm)
+            {
+                navigationPending = false;
+            }
         }
 
         if (tabs.Length == 0) return;
@@ -126,8 +155,16 @@ namespace Overview
                     continue;
                 }
 
-                if (UI::BeginTabItem(tab.GetName()))
+                bool isRequestedPvm = navigationPending && tab.GetPvm().GetId() == requestedPvmId;
+                int tabFlags = isRequestedPvm ? int(UI::TabItemFlags::SetSelected) : int(UI::TabItemFlags::None);
+                if (UI::BeginTabItem(tab.GetName(), tabFlags))
                 {
+                    activeTab = int(i);
+                    if (isRequestedPvm)
+                    {
+                        tab.SelectDetailTab(requestedLeaderboard);
+                        navigationPending = false;
+                    }
                     tab.Render();
                     UI::EndTabItem();
                 }
