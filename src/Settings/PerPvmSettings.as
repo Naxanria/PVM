@@ -207,7 +207,7 @@ namespace Setting
             PVM@ pvm = setting.GetPvm();
             if (pvm is null) continue;
 
-            UI::BeginTabItem(pvm.Name);
+            if (!UI::BeginTabItem(pvm.Name)) continue;
             bool enabled = setting.IsEnabled();
             bool newEnabled = UI::Checkbox("Enabled", enabled);
             if (newEnabled != enabled)
@@ -217,9 +217,9 @@ namespace Setting
 
             UI::Text("Show medals: ");
 
-            for (uint m = pvm.labels.Length - 1; m >= 0; m--)
+            for (int m = int(pvm.labels.Length) - 1; m >= 0; m--)
             {
-                if (m >= setting.medalsEnabled.Length) continue;
+                if (uint(m) >= setting.medalsEnabled.Length) continue;
                 setting.medalsEnabled[m] = UI::Checkbox(pvm.labels[m].GetFull(), setting.medalsEnabled[m]);
             }
 
