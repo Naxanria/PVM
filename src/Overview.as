@@ -8,15 +8,18 @@ namespace Overview
 
     bool firstLoad = true;
     bool needsRefresh = false;
+    bool navigationPending = false;
+    bool requestedLeaderboard = false;
+    string requestedPvmId = "";
 
-    float widthName, widthTime, widthMedal, widthGrade, widthTmxId;
+    float widthName, widthTime, widthMedal, widthTier, widthTmxId;
     
     void Init()
     {
         widthName = UI::MeasureString("AAAAAAAAAAAAAAAAAAAAAAAA").x;
         widthTime = UI::MeasureString("10:59:59.999").x;
         widthMedal = UI::MeasureString(Icons::Circle).x;
-        widthGrade = UI::MeasureString("AAAAAAAAAAAAAAAA").x;
+        widthTier = UI::MeasureString("AAAAAAAAAAAAAAAA").x;
         widthTmxId = UI::MeasureString("399999").x;
         
         initialized = true;
@@ -45,7 +48,7 @@ namespace Overview
             return;
         }
 
-        if (activeTab < 0 || activeTab >= tabs.Length)
+        if (activeTab < 0 || activeTab >= int(tabs.Length))
         {
             activeTab = 0;
         }
@@ -63,7 +66,7 @@ namespace Overview
             return;
         }
 
-        if (activeTab < 0 || activeTab >= tabs.Length)
+        if (activeTab < 0 || activeTab >= int(tabs.Length))
         {
             activeTab = 0;
             return;
@@ -73,6 +76,14 @@ namespace Overview
         {
             activeTab = 0;
         }
+    }
+
+    void OpenPvm(const string &in pvmId, bool leaderboard)
+    {
+        Setting::overview_show = true;
+        requestedPvmId = pvmId;
+        requestedLeaderboard = leaderboard;
+        navigationPending = true;
     }
 
     void Render()
@@ -96,6 +107,24 @@ namespace Overview
         if (activeTab < 0 || uint(activeTab) >= tabs.Length)
         {
             activeTab = 0;
+        }
+
+        if (navigationPending)
+        {
+            bool foundRequestedPvm = false;
+            for (uint i = 0; i < tabs.Length; i++)
+            {
+                if (tabs[i].GetPvm().GetId() == requestedPvmId)
+                {
+                    activeTab = int(i);
+                    foundRequestedPvm = true;
+                    break;
+                }
+            }
+            if (!foundRequestedPvm)
+            {
+                navigationPending = false;
+            }
         }
 
         if (tabs.Length == 0) return;
@@ -126,29 +155,17 @@ namespace Overview
                     continue;
                 }
 
-                UI::TabItemFlags flags = UI::TabItemFlags::None;
-                if (firstLoad && activeTab == int(i))
+                bool isRequestedPvm = navigationPending && tab.GetPvm().GetId() == requestedPvmId;
+                int tabFlags = isRequestedPvm ? int(UI::TabItemFlags::SetSelected) : int(UI::TabItemFlags::None);
+                if (UI::BeginTabItem(tab.GetName(), tabFlags))
                 {
-                    flags = UI::TabItemFlags::SetSelected;
-                }
-
-                if (UI::BeginTabItem(tab.GetName(), flags))
-                {
-                    if (firstLoad)
+                    activeTab = int(i);
+                    if (isRequestedPvm)
                     {
-                        if (activeTab != int(i))
-                        {
-                            UI::EndTabItem();
-                            continue;
-                        }
-
+                        tab.SelectDetailTab(requestedLeaderboard);
+                        navigationPending = false;
                     }
-
-                    firstLoad = false;
-                    activeTab = i;
-                    
                     tab.Render();
-
                     UI::EndTabItem();
                 }
             }

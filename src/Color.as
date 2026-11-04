@@ -1,11 +1,11 @@
-namespace Colour
+namespace Color
 {
     const string TIME_PERSONAL_BEST = "\\$0FF";
     const string TIME_DELTA_AHEAD = "\\$77F";
     const string TIME_DELTA_BEHIND = "\\$F77";
 
     const string FORMAT_AUTHOR_COLOUR = "\\$AAA";
-    const string FORMAT_GRADE_COLOUR = "\\$36B";
+    const string FORMAT_TIER_COLOUR = "\\$36B";
 
     const string BRONZE = "964";
     const string SILVER = "778";

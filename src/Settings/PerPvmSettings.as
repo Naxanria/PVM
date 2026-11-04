@@ -57,7 +57,7 @@ namespace Setting
 
         void LoadFromJson(Json::Value@ json)
         {
-            Logging::Info("Loading " + pvm.Id);
+            Logging::Debug("PVM " + pvm.Name + " [" + pvm.Id + "] loaded saved settings");
             if (!json.HasKey("m")) 
             {
                 for (uint i = 0; i < medalsEnabled.Length; i++)
@@ -207,25 +207,23 @@ namespace Setting
             PVM@ pvm = setting.GetPvm();
             if (pvm is null) continue;
 
-            if (UI::BeginTabItem(pvm.Name))
+            if (!UI::BeginTabItem(pvm.Name)) continue;
+            bool enabled = setting.IsEnabled();
+            bool newEnabled = UI::Checkbox("Enabled", enabled);
+            if (newEnabled != enabled)
             {
-                bool enabled = setting.IsEnabled();
-                bool newEnabled = UI::Checkbox("Enabled", enabled);
-                if (newEnabled != enabled)
-                {
-                    setting.SetEnabled(newEnabled);
-                }
-
-                UI::Text("Show medals: ");
-
-                for (uint m = pvm.labels.Length - 1; m >= 0; m--)
-                {
-                    if (m >= setting.medalsEnabled.Length) continue;
-                    setting.medalsEnabled[m] = UI::Checkbox(pvm.labels[m].GetFull(), setting.medalsEnabled[m]);
-                }      
-
-                UI::EndTabItem();          
+                setting.SetEnabled(newEnabled);
             }
+
+            UI::Text("Show medals: ");
+
+            for (int m = int(pvm.labels.Length) - 1; m >= 0; m--)
+            {
+                if (uint(m) >= setting.medalsEnabled.Length) continue;
+                setting.medalsEnabled[m] = UI::Checkbox(pvm.labels[m].GetFull(), setting.medalsEnabled[m]);
+            }
+
+            UI::EndTabItem();
         }
 
         UI::EndTabBar();        

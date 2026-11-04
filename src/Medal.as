@@ -26,9 +26,9 @@ class Medal
         return color + icon;
     }
 
-    string GetFull(bool resetColour = true)
+    string GetFull(bool resetColor = true)
     {
-        return GetIcon() + (resetColour ? "\\$z" : "") + " " + GetName();
+        return GetIcon() + (resetColor ? "\\$z" : "") + " " + GetName();
     }
 }
 

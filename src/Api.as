@@ -9,7 +9,7 @@ namespace API
 
         if (resp.HasFailed || !resp.HasSucceeded) {
             UI::ShowNotification("Couldn't load map info :(");
-            Logging::Warn('GetMapFromUid failed for ' + mapUid + ": " + resp.ErrorCode + ", " + resp.ErrorType + ", " + resp.ErrorDescription, true);
+            Logging::Error("PVM system [API] GetMapFromUid failed for " + mapUid + ": " + resp.ErrorCode + ", " + resp.ErrorType + ", " + resp.ErrorDescription, true);
             return null;
         }
         return resp.Map;
@@ -38,7 +38,7 @@ namespace API
 
         if (task.HasFailed || !task.HasSucceeded)
         {
-            Logging::Warn("Failed to get player record on map: " + mapUid + " Error: " + task.ErrorCode + ", " + task.ErrorType + ", " + task.ErrorDescription, true);
+            Logging::Error("PVM system [API] failed to get player record on map " + mapUid + ": " + task.ErrorCode + ", " + task.ErrorType + ", " + task.ErrorDescription, true);
         }
 
         if (task.MapRecordList.Length == 0)
@@ -124,7 +124,7 @@ namespace API
     {
         if (!Permissions::PlayLocalMap())
         {
-            Logging::Error("Refusing to load map because you lack necessary permissions. Club access required", true);
+            Logging::Error("PVM system [API] refusing to load map because you lack necessary permissions; club access required", true);
             return;
         }
         auto map = GetMapFromUid(uid);

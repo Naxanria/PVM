@@ -12,7 +12,7 @@ namespace Images
 
         void DownloadAsync()
         {        
-            Logging::Debug("Loading texture " + url);
+            Logging::Debug("PVM system [images] loading texture " + url);
             auto req = API::GetHttp(url);
             while (!req.Finished())
             {
@@ -31,7 +31,7 @@ namespace Images
                     }
                     else
                     {
-                        Logging::Debug("webp format found, falling back");
+                        Logging::Debug("PVM system [images] webp format found; falling back");
                         auto req2 = API::GetHttp(fallback);
                         while (!req2.Finished())
                         {
@@ -44,14 +44,14 @@ namespace Images
                             {
                                 @texture = null;
                                 error = true;
-                                Logging::Debug("Fallback failed");
+                                Logging::Debug("PVM system [images] texture fallback failed");
                             }
                         }
                         else
                         {
                             error = true;
                             unsupportedFormat = true;
-                            Logging::Debug("No image found");
+                            Logging::Debug("PVM system [images] no image found");
                         }
                     }
                 }
@@ -67,7 +67,7 @@ namespace Images
                     }
                     else
                     {
-                        Logging::Debug("Loaded texture: " + url);
+                        Logging::Debug("PVM system [images] loaded texture " + url);
                     }
                 }
             }
