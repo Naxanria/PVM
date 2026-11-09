@@ -127,7 +127,7 @@ void LoadPvms(Json::Value@ json)
     for (uint i = 0; i < _.Length; i++)
     {
         PVM@ pvm = PVM::FromJson(_[i]);
-        Logging::Debug(pvm.GetLogIdentity() + " found in mappack list; author=" + pvm.Author);
+        Logging::Debug(Utils::GetLogIdentity(pvm.Name, pvm.GetId()) + " found in mappack list; author=" + pvm.Author);
         pvms.InsertLast(pvm);
     }
 }
