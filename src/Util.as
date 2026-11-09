@@ -1,5 +1,10 @@
 namespace Utils
 {   
+    string GetLogIdentity(const string &in name, const string &in id)
+    {
+        return "PVM " + name + " [" + id + "]";
+    }
+
     int Clamp(int val, int min, int max)
     {
         if (val < min) return min;

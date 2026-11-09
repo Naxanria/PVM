@@ -41,11 +41,6 @@ class PVM
         return Id + "";
     }
 
-    string GetLogIdentity()
-    {
-        return "PVM " + Name + " [" + Id + "]";
-    }
-
     int GetPB()
     {
         return currentMap.pb;
@@ -84,7 +79,7 @@ class PVM
     void UpdateLeaderboardSortMode(LeaderboardSortMode mode)
     {
         if (leaderboardSortMode == mode) return;
-        Logging::Debug(GetLogIdentity() + " leaderboard sort mode changed from=" + GetLeaderboardSortModeName(leaderboardSortMode) + " to=" + GetLeaderboardSortModeName(mode) + " entries=" + leaderboardEntries.Length);
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " leaderboard sort mode changed from=" + tostring(leaderboardSortMode) + " to=" + tostring(mode) + " entries=" + leaderboardEntries.Length);
         leaderboardSortMode = mode;
         RebuildSortedLeaderboardEntries();
     }
@@ -164,7 +159,7 @@ class PVM
             if (sortedSample != "") sortedSample += " | ";
             sortedSample += i + ":position=" + entry.Position + ",points=" + entry.TotalPoints + ",name=" + NormalizePlayerName(entry.PlayerName) + ",rank=" + entry.RankName;
         }
-        Logging::Debug(GetLogIdentity() + " leaderboard sort applied mode=" + GetLeaderboardSortModeName(leaderboardSortMode) + " filtered=" + filtered.Length + " sorted=" + sortedLeaderboardEntries.Length + " firstRows=[" + sortedSample + "]");
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " leaderboard sort applied mode=" + tostring(leaderboardSortMode) + " filtered=" + filtered.Length + " sorted=" + sortedLeaderboardEntries.Length + " firstRows=[" + sortedSample + "]");
     }
 
     private int CompareLeaderboardEntries(LeaderboardEntry@ a, LeaderboardEntry@ b, LeaderboardSortMode mode)
@@ -218,27 +213,6 @@ class PVM
         comparison = CompareLeaderboardName(a, b, descending);
         if (comparison != 0) return comparison;
         return CompareLeaderboardRank(a, b, descending);
-    }
-
-    private string GetLeaderboardSortModeName(LeaderboardSortMode mode)
-    {
-        switch (mode)
-        {
-            case LeaderboardSortMode::POSITION_DESC: return "POSITION_DESC";
-            case LeaderboardSortMode::POSITION_ASC: return "POSITION_ASC";
-            case LeaderboardSortMode::POINTS_ASC: return "POINTS_ASC";
-            case LeaderboardSortMode::POINTS_DESC: return "POINTS_DESC";
-            case LeaderboardSortMode::PLAYER_ASC: return "PLAYER_ASC";
-            case LeaderboardSortMode::PLAYER_DESC: return "PLAYER_DESC";
-            case LeaderboardSortMode::RANK_ASC: return "RANK_ASC";
-            case LeaderboardSortMode::RANK_DESC: return "RANK_DESC";
-            case LeaderboardSortMode::COMPLETED_ASC: return "COMPLETED_ASC";
-            case LeaderboardSortMode::COMPLETED_DESC: return "COMPLETED_DESC";
-            case LeaderboardSortMode::BEST_ASC: return "BEST_ASC";
-            case LeaderboardSortMode::BEST_DESC: return "BEST_DESC";
-        }
-
-        return "UNKNOWN";
     }
 
     private bool IsLeaderboardSortDescending(LeaderboardSortMode mode)
@@ -429,7 +403,7 @@ class PVM
         leaderboardOffset += int(json.Length);
         leaderboardLoading = false;
         RebuildSortedLeaderboardEntries();
-        Logging::Debug(GetLogIdentity() + " leaderboard fetch applied received=" + json.Length + " total=" + leaderboardEntries.Length + " hasMore=" + leaderboardHasMore);
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " leaderboard fetch applied received=" + json.Length + " total=" + leaderboardEntries.Length + " hasMore=" + leaderboardHasMore);
     }
 
     string GetRankNameForPoints(int points)
@@ -487,14 +461,14 @@ class PVM
             rankOrderSummary += tier.Name + "(" + tier.PointsNeeded + ")";
         }
 
-        Logging::Debug(GetLogIdentity() + " loaded API rank thresholds count=" + tiers.Length + " ranks=[" + rankOrderSummary + "]");
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " loaded API rank thresholds count=" + tiers.Length + " ranks=[" + rankOrderSummary + "]");
     }
 
     private void ResetSourceData()
     {
         if (maps.Length > 0 || labels.Length > 0 || tiers.Length > 0 || leaderboardEntries.Length > 0)
         {
-            Logging::Debug(GetLogIdentity() + " resetting source data: maps=" + maps.Length + " labels=" + labels.Length + " tiers=" + tiers.Length + " leaderboard=" + leaderboardEntries.Length + " sortedList=" + sortedList.Length);
+            Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " resetting source data: maps=" + maps.Length + " labels=" + labels.Length + " tiers=" + tiers.Length + " leaderboard=" + leaderboardEntries.Length + " sortedList=" + sortedList.Length);
         }
         uidToMap = dictionary();
         maps = {};
@@ -582,7 +556,7 @@ class PVM
         mapTierOrder = {};
         if (json is null || json.GetType() != Json::Type::Array)
         {
-            Logging::Debug(GetLogIdentity() + " missing mappackTiers array; tier sorting will use unknown-tier fallback");
+            Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " missing mappackTiers array; tier sorting will use unknown-tier fallback");
             return;
         }
 
@@ -601,24 +575,24 @@ class PVM
             tierOrderSummary += tierName + "(" + tierId + ")";
         }
 
-        Logging::Debug(GetLogIdentity() + " loaded ascending backend map tier order count=" + mapTierOrder.Length + " tiers=[" + tierOrderSummary + "]");
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " loaded ascending backend map tier order count=" + mapTierOrder.Length + " tiers=[" + tierOrderSummary + "]");
     }
 
     private void LoadMaps(Json::Value@ json)
     {
-        Logging::Debug(GetLogIdentity() + " loading maps: incoming=" + json.Length + " existingMaps=" + maps.Length);
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " loading maps: incoming=" + json.Length + " existingMaps=" + maps.Length);
         for (uint i = 0; i < json.Length; i++)
         {
             MapData@ map = MapData(json[i]);
             if (map is null || map.Uid == "")
             {
-                Logging::Debug(GetLogIdentity() + " skipping empty map at index=" + i);
+                Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " skipping empty map at index=" + i);
                 continue;
             }
 
             if (uidToMap.Exists(map.Uid))
             {
-                Logging::Debug(GetLogIdentity() + " skipping duplicate map uid=" + map.Uid);
+                Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " skipping duplicate map uid=" + map.Uid);
                 continue;
             }
 
@@ -626,7 +600,7 @@ class PVM
             uidToMap[map.Uid] = @map;
         }
         RebuildSortedList();
-        Logging::Debug(GetLogIdentity() + " loaded maps: count=" + maps.Length + " uniqueUidCount=" + uidToMap.GetSize());
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " loaded maps: count=" + maps.Length + " uniqueUidCount=" + uidToMap.GetSize());
     }
 
     bool ContainsMap(string &in uid)
@@ -866,33 +840,16 @@ class PVM
     void UpdateMapSortMode(MapSortMode mode)
     {
         if (sortMode == mode) return;
-        Logging::Debug(GetLogIdentity() + " map sort mode changed from=" + GetMapSortModeName(sortMode) + " to=" + GetMapSortModeName(mode) + " maps=" + maps.Length);
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " map sort mode changed from=" + tostring(sortMode) + " to=" + tostring(mode) + " maps=" + maps.Length);
         sortMode = mode;
         RebuildSortedList();
-    }
-
-    private string GetMapSortModeName(MapSortMode mode)
-    {
-        switch (mode)
-        {
-            case MapSortMode::AUTHOR_ASC: return "AUTHOR_ASC";
-            case MapSortMode::AUTHOR_DESC: return "AUTHOR_DESC";
-            case MapSortMode::NAME_ASC: return "NAME_ASC";
-            case MapSortMode::NAME_DESC: return "NAME_DESC";
-            case MapSortMode::TIER_ASC: return "TIER_ASC";
-            case MapSortMode::TIER_DESC: return "TIER_DESC";
-            case MapSortMode::TIME_ASC: return "TIME_ASC";
-            case MapSortMode::TIME_DESC: return "TIME_DESC";
-        }
-
-        return "UNKNOWN";
     }
 
     private void RebuildSortedList()
     {
         if (maps is null)
         {
-            Logging::Debug(GetLogIdentity() + " cannot rebuild sorted list because maps is null");
+            Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " cannot rebuild sorted list because maps is null");
             sortedList = {};
             sortedListDirty = false;
             return;
@@ -912,7 +869,7 @@ class PVM
 
             if (seenUids.Exists(map.Uid))
             {
-                Logging::Debug(GetLogIdentity() + " dropping duplicate map uid=" + map.Uid + " in sort rebuild");
+                Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " dropping duplicate map uid=" + map.Uid + " in sort rebuild");
                 continue;
             }
 
@@ -920,7 +877,7 @@ class PVM
             rebuilt.InsertLast(map);
         }
 
-        Logging::Debug(GetLogIdentity() + " rebuilding sorted map list: sourceCount=" + maps.Length + " filtered=" + rebuilt.Length + " mode=" + GetMapSortModeName(sortMode) + " tierOrderCount=" + mapTierOrder.Length + " search='" + currentSearch + "'");
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " rebuilding sorted map list: sourceCount=" + maps.Length + " filtered=" + rebuilt.Length + " mode=" + tostring(sortMode) + " tierOrderCount=" + mapTierOrder.Length + " search='" + currentSearch + "'");
 
         uint[] order = {};
         for (uint i = 0; i < rebuilt.Length; i++)
@@ -959,7 +916,7 @@ class PVM
             if (sortedSample != "") sortedSample += " | ";
             sortedSample += i + ":tier=" + map.PvmTier + "#" + map.PvmTierId + ",name=" + Text::StripFormatCodes(map.Name).Trim().ToLower() + ",pb=" + map.pb;
         }
-        Logging::Debug(GetLogIdentity() + " sorted map list applied mode=" + GetMapSortModeName(sortMode) + " count=" + sortedList.Length + " firstRows=[" + sortedSample + "]");
+        Logging::Debug(Utils::GetLogIdentity(Name, GetId()) + " sorted map list applied mode=" + tostring(sortMode) + " count=" + sortedList.Length + " firstRows=[" + sortedSample + "]");
     }
 
     private MapData@[] FilteredList()
