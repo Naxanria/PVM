@@ -211,71 +211,17 @@ namespace Overview
 
         private vec4 GetLeaderboardRowColor(const string &in colorValue, uint rowIndex)
         {
-            string color = colorValue.Trim();
-            if (color == "")
-            {
-                return vec4(0.10f, 0.10f, 0.10f, 0.06f);
-            }
-
-            if (color.Length > 0 && color.SubStr(0, 1) == "#")
-            {
-                color = color.SubStr(1, color.Length - 1);
-            }
-
-            if (color.Length > 0 && color.SubStr(0, 1) == "$")
-            {
-                color = color.SubStr(1, color.Length - 1);
-            }
-
-            if (color.Length == 3)
-            {
-                color = color.SubStr(0, 1) + color.SubStr(0, 1) +
-                    color.SubStr(1, 1) + color.SubStr(1, 1) +
-                    color.SubStr(2, 1) + color.SubStr(2, 1);
-            }
-
-            if (color.Length != 6)
-            {
-                return vec4(0.10f, 0.10f, 0.10f, 0.06f);
-            }
-
-            int r = ParseHexByte(color.SubStr(0, 2));
-            int g = ParseHexByte(color.SubStr(2, 2));
-            int b = ParseHexByte(color.SubStr(4, 2));
-
-            float rf = float(r) / 255.0f;
-            float gf = float(g) / 255.0f;
-            float bf = float(b) / 255.0f;
-
             float stripe = rowIndex % 2 == 0 ? 0.68f : 1.12f;
             float alpha = rowIndex % 2 == 0 ? 0.08f : 0.10f;
-            return vec4(rf * stripe, gf * stripe, bf * stripe, alpha);
-        }
-
-        private int ParseHexByte(const string &in hex)
-        {
-            int value = 0;
-            for (int i = 0; i < hex.Length; i++)
+            vec4 color;
+            if(Text::TryParseHexColor(colorValue, color))
             {
-                string c = hex.SubStr(i, 1).ToUpper();
-                if (c == "0") value = value * 16 + 0;
-                else if (c == "1") value = value * 16 + 1;
-                else if (c == "2") value = value * 16 + 2;
-                else if (c == "3") value = value * 16 + 3;
-                else if (c == "4") value = value * 16 + 4;
-                else if (c == "5") value = value * 16 + 5;
-                else if (c == "6") value = value * 16 + 6;
-                else if (c == "7") value = value * 16 + 7;
-                else if (c == "8") value = value * 16 + 8;
-                else if (c == "9") value = value * 16 + 9;
-                else if (c == "A") value = value * 16 + 10;
-                else if (c == "B") value = value * 16 + 11;
-                else if (c == "C") value = value * 16 + 12;
-                else if (c == "D") value = value * 16 + 13;
-                else if (c == "E") value = value * 16 + 14;
-                else if (c == "F") value = value * 16 + 15;
+                return vec4(color.x * stripe, color.y * stripe, color.z * stripe, alpha);
             }
-            return value;
+            else
+            {
+                return vec4(0.10f, 0.10f, 0.10f, 0.06f);
+            }
         }
 
     }
