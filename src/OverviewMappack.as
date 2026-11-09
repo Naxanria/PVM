@@ -1,10 +1,8 @@
 namespace Overview
 {
-    class MappackOverview
+    class MappackOverview : OverviewTabContent
     {
         private PVM@ pvm;
-        private string search = "";
-        private int foundCount = 0;
 
         MappackOverview(PVM@ pvm)
         {
@@ -13,9 +11,13 @@ namespace Overview
 
         void Render()
         {
-            RenderSearch();
+            if (RenderSearch("mappack_search_" + pvm.GetId()))
+            {
+                pvm.UpdateSearch(GetSearch());
+            }
 
             MapData@[] mapList = pvm.GetSortedList();
+            RenderSearchResultCount(mapList.Length);
             string tableId = "pvm_overview_table_" + pvm.GetId();
 
             UI::TableFlags mapFlags = UI::TableFlags(uint(UI::TableFlags::SizingFixedFit) | uint(UI::TableFlags::RowBg));
@@ -79,7 +81,10 @@ namespace Overview
 
                     if (isSortable)
                     {
-                        DrawMapSortHeader(label, ascMode, descMode, currentMapSortMode);
+                        if (DrawSortHeader(label, currentMapSortMode == ascMode, currentMapSortMode == descMode))
+                        {
+                            HandleSortAction(ascMode, descMode, currentMapSortMode);
+                        }
                     }
                     else
                     {
@@ -93,7 +98,7 @@ namespace Overview
                     if (map is null) continue;
 
                     UI::TableNextRow();
-                    UI::TableSetBgColor(UI::TableBgTarget::RowBg0, GetMapRowColor(map.TierColor.Trim(), i));
+                    UI::TableSetBgColor(UI::TableBgTarget::RowBg0, GetRowColor(map.TierColor.Trim(), i));
 
                     UI::TableNextColumn();
                     UI::Text(Text::OpenplanetFormatCodes(map.Name));
@@ -142,56 +147,6 @@ namespace Overview
             }
         }
 
-        private void RenderSearch()
-        {
-            UI::BeginGroup();
-            UI::AlignTextToFramePadding();
-            UI::Text("Search:");
-            UI::SameLine();
-
-            string oldsearch = search;
-            UI::SetNextItemWidth(128);
-            search = UI::InputText("##", oldsearch, UI::InputTextFlags::EscapeClearsAll);
-
-            if (search != oldsearch)
-            {
-                pvm.UpdateSearch(search);
-                if (search != "")
-                {
-                    foundCount = pvm.GetSortedList().Length;
-                }
-            }
-
-            if (search != "")
-            {
-                UI::SameLine();
-                string res = "result";
-                if (foundCount != 1) res = "results";
-                UI::Text(foundCount + " " + res);
-            }
-
-            UI::EndGroup();
-        }
-
-        private void DrawMapSortHeader(const string &in label, MapSortMode ascMode, MapSortMode descMode, MapSortMode currentMode)
-        {
-            string display = label;
-            if (currentMode == ascMode)
-            {
-                display += Icons::CaretUp;
-            }
-            else if (currentMode == descMode)
-            {
-                display += Icons::CaretDown;
-            }
-
-            UI::Text(display);
-            if (UI::IsItemClicked())
-            {
-                HandleSortAction(ascMode, descMode, currentMode);
-            }
-        }
-
         private void HandleSortAction(MapSortMode ascMode, MapSortMode descMode, MapSortMode currentMode)
         {
             if (currentMode == ascMode)
@@ -225,21 +180,6 @@ namespace Overview
             }
 
             return Medals::NoMedal.GetIcon();
-        }
-
-        private vec4 GetMapRowColor(const string &in colorValue, uint rowIndex)
-        {
-            float stripe = rowIndex % 2 == 0 ? 0.68f : 1.12f;
-            float alpha = rowIndex % 2 == 0 ? 0.08f : 0.10f;
-            vec4 color;
-            if(Text::TryParseHexColor(colorValue, color))
-            {
-                return vec4(color.x * stripe, color.y * stripe, color.z * stripe, alpha);
-            }
-            else
-            {
-                return vec4(0.10f, 0.10f, 0.10f, 0.06f);
-            }
         }
 
     }

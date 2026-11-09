@@ -1,9 +1,8 @@
 namespace Overview
 {
-    class LeaderboardOverview
+    class LeaderboardOverview : OverviewTabContent
     {
         private PVM@ pvm;
-        private string search = "";
 
         LeaderboardOverview(PVM@ pvm)
         {
@@ -18,20 +17,13 @@ namespace Overview
                 return;
             }
 
-            UI::BeginGroup();
-            UI::AlignTextToFramePadding();
-            UI::Text("Search:");
-            UI::SameLine();
-            string oldSearch = search;
-            UI::SetNextItemWidth(180.0f);
-            search = UI::InputText("##leaderboard_search", oldSearch, UI::InputTextFlags::EscapeClearsAll);
-            if (search != oldSearch)
+            if (RenderSearch("leaderboard_search_" + pvm.GetId()))
             {
-                pvm.UpdateLeaderboardSearch(search);
+                pvm.UpdateLeaderboardSearch(GetSearch());
             }
-            UI::EndGroup();
 
             LeaderboardEntry@[] entries = pvm.GetSortedLeaderboardEntries();
+            RenderSearchResultCount(entries.Length);
             string tableId = "pvm_leaderboard_" + pvm.GetId();
 
             if (entries.Length == 0)
@@ -109,7 +101,10 @@ namespace Overview
 
                     if (isSortable)
                     {
-                        DrawLeaderboardSortHeader(label, ascMode, descMode, currentLeaderboardSortMode);
+                        if (DrawSortHeader(label, currentLeaderboardSortMode == ascMode, currentLeaderboardSortMode == descMode))
+                        {
+                            HandleSortAction(ascMode, descMode, currentLeaderboardSortMode);
+                        }
                     }
                     else
                     {
@@ -123,7 +118,7 @@ namespace Overview
                     if (entry is null) continue;
 
                     UI::TableNextRow();
-                    UI::TableSetBgColor(UI::TableBgTarget::RowBg0, GetLeaderboardRowColor(entry.RankColor, i));
+                    UI::TableSetBgColor(UI::TableBgTarget::RowBg0, GetRowColor(entry.RankColor, i));
 
                     UI::TableNextColumn();
                     UI::Text(tostring(entry.Position) + ".");
@@ -173,25 +168,6 @@ namespace Overview
             }
         }
 
-        private void DrawLeaderboardSortHeader(const string &in label, LeaderboardSortMode ascMode, LeaderboardSortMode descMode, LeaderboardSortMode currentMode)
-        {
-            string display = label;
-            if (currentMode == ascMode)
-            {
-                display += Icons::CaretUp;
-            }
-            else if (currentMode == descMode)
-            {
-                display += Icons::CaretDown;
-            }
-
-            UI::Text(display);
-            if (UI::IsItemClicked())
-            {
-                HandleSortAction(ascMode, descMode, currentMode);
-            }
-        }
-
         private void HandleSortAction(LeaderboardSortMode ascMode, LeaderboardSortMode descMode, LeaderboardSortMode currentMode)
         {
             if (currentMode == ascMode)
@@ -207,21 +183,6 @@ namespace Overview
             }
 
             pvm.UpdateLeaderboardSortMode(ascMode);
-        }
-
-        private vec4 GetLeaderboardRowColor(const string &in colorValue, uint rowIndex)
-        {
-            float stripe = rowIndex % 2 == 0 ? 0.68f : 1.12f;
-            float alpha = rowIndex % 2 == 0 ? 0.08f : 0.10f;
-            vec4 color;
-            if(Text::TryParseHexColor(colorValue, color))
-            {
-                return vec4(color.x * stripe, color.y * stripe, color.z * stripe, alpha);
-            }
-            else
-            {
-                return vec4(0.10f, 0.10f, 0.10f, 0.06f);
-            }
         }
 
     }
