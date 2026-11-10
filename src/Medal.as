@@ -183,6 +183,7 @@ void SyncUmeState()
     RegisterUME();
 }
 #else
+void SyncUmeState() {}
 void RegisterUME() {}
 void OnDestroyedUME() {}
 #endif
